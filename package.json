@@ -4,8 +4,11 @@
   "packageManager": "pnpm@10.29.2",
   "scripts": {
     "build": "pnpm -r build",
-    "test": "pnpm -r test",
+    "test": "bash scripts/test-all.sh",
     "dev": "pnpm --filter @kuroko/web dev",
     "listen": "pnpm --filter @kuroko/solver listen"
+  },
+  "devDependencies": {
+    "near-api-js": "7.3.1"
   }
 }

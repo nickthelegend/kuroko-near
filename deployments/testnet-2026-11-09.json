@@ -1,0 +1,25 @@
+{
+  "network": "testnet",
+  "accountId": "kuroko-f836334a.qday-bob-mw8rcsal.testnet",
+  "tokenId": "usdc.testnet",
+  "txHash": "FAAVdRMb8kf344BAUxuAjFuXmBnP9L71DjfsMAbbEsJ2",
+  "explorer": "https://testnet.nearblocks.io/txns/FAAVdRMb8kf344BAUxuAjFuXmBnP9L71DjfsMAbbEsJ2",
+  "rpcUrl": "https://test.rpc.fastnear.com",
+  "wasmSha256": "924312053f4ba27e5206fb42f8400d34792a6654a18caaea5c245efdc1c02442",
+  "state": {
+    "total_shares": "0",
+    "usdc_balance": "0",
+    "paused": false,
+    "daily_loss_usdc": "0",
+    "loss_day": 0,
+    "constitution": {
+      "allowed_pairs": [
+        "nep141:usdc.testnet/nep141:wrap.testnet"
+      ],
+      "max_inventory_usdc": "1000000",
+      "min_spread_bps": 30,
+      "daily_loss_limit_usdc": "100000"
+    }
+  },
+  "observedAt": "2026-11-09T14:51:32.060Z"
+}
