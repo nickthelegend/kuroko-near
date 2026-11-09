@@ -44,7 +44,7 @@ VAULT_ACCOUNT=kuroko-f836334a.qday-bob-mw8rcsal.testnet pnpm --filter @kuroko/mc
 
 ### Relay listen demo (requires partner access)
 
-Create a gitignored `.env` from `.env.example` and set `PARTNER_JWT`, `NEAR_MAINNET_ACCOUNT`, the two `KUROKO_ASSET_*` identifiers, and policy fields. Load it into the process environment, then run `pnpm listen`. The local `http://127.0.0.1:3100/stats` endpoint returns live counts. Run at least 30 minutes and preserve the dated `packages/solver/data/` capture. Without the JWT, the process exits with `Setup required: PARTNER_JWT`; no quote tape is fabricated. Listen mode **never** sends `quote_response`.
+Create a gitignored `.env` from `.env.example` and set `PARTNER_JWT`, the two `KUROKO_ASSET_*` identifiers, and policy fields. Set `NEAR_MAINNET_ACCOUNT` to include actual `intents.near` inventory; without it the listener still records real requests but shows an inventory setup reason. Load it into the process environment, then run `pnpm listen`. The local `http://127.0.0.1:3100/stats` endpoint returns live counts. Run at least 30 minutes and preserve the dated `packages/solver/data/` capture. Without the JWT, the process exits with `Setup required: PARTNER_JWT`; no quote tape is fabricated. Listen mode **never** sends `quote_response`.
 
 ## Deployment and evidence
 
