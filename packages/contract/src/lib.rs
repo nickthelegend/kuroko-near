@@ -1,7 +1,7 @@
 use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
 use near_sdk::json_types::U128;
 use near_sdk::serde::{Deserialize, Serialize};
-use near_sdk::{env, ext_contract, near, require, AccountId, Gas, NearToken, PanicOnDefault, PromiseOrValue, PromiseResult};
+use near_sdk::{env, ext_contract, near, require, AccountId, Gas, NearToken, PanicOnDefault, PromiseOrValue};
 use std::collections::BTreeMap;
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
@@ -73,7 +73,8 @@ impl KurokoVault {
     pub fn proposals(&self) -> Vec<Proposal> { self.proposals.clone() }
 
     // NEP-141 receiver. The caller must be the configured token contract.
-    pub fn ft_on_transfer(&mut self, sender_id: AccountId, amount: U128, _msg: String) -> PromiseOrValue<U128> {
+    pub fn ft_on_transfer(&mut self, sender_id: AccountId, amount: U128, msg: String) -> PromiseOrValue<U128> {
+        let _ = msg;
         require!(env::predecessor_account_id() == self.usdc, "USDC token only");
         require!(!self.paused, "vault paused");
         require!(!self.has_open_vote(), "deposit locked during vote");
@@ -107,7 +108,7 @@ impl KurokoVault {
 
     #[private]
     pub fn on_withdraw(&mut self, account_id: AccountId, shares: U128, amount: U128) {
-        if !matches!(env::promise_result(0), PromiseResult::Successful(_)) {
+        if env::promise_result_checked(0, 10_000).is_err() {
             *self.shares.entry(account_id).or_default() += shares.0;
             self.total_shares += shares.0;
             self.cash += amount.0;
