@@ -12,7 +12,7 @@
 
 ## Blocked
 
-`PARTNER_JWT` is required for the 30-minute relay capture and real quote fixtures. `NEAR_MAINNET_ACCOUNT`, `NEAR_PRIVATE_KEY`, funded inventory, and Nick's approval are required for mainnet activity. A restricted custody design is still needed: a function-call key does not constrain off-chain Intents signatures. Sputnik DAO, Pyth, 1Click rebalance, real fills, spread revenue, and a public repo remain pending. Exact steps are in [BLOCKED.md](BLOCKED.md).
+`PARTNER_JWT` is required for the 30-minute relay capture and real quote fixtures under the [market-maker guide](https://docs.near-intents.org/integration/market-makers/quickstart). `NEAR_MAINNET_ACCOUNT`, `NEAR_PRIVATE_KEY`, funded inventory, and Nick's approval are required for mainnet activity. A restricted custody design is still needed: a function-call key does not constrain off-chain Intents signatures under the [Verifier account model](https://docs.near-intents.org/integration/verifier-contract/account-abstraction). Sputnik DAO, Pyth, 1Click rebalance, real fills, spread revenue, and a public repo remain pending. Exact steps are in [BLOCKED.md](BLOCKED.md).
 
 ## Demo commands
 
