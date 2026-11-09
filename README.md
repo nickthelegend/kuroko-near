@@ -37,7 +37,7 @@ The browser's deposit, withdrawal, proposal, and vote buttons sign transactions 
 - **NEAR Intents / `intents.near`:** the solver follows the market-maker Message Bus format and reads its own Verifier reserves from mainnet. The relay is mainnet-only and requires a Partner JWT. Kuroko remains in listen mode until the protocol and custody gates are met.
 - **Function-call keys:** these restrict NEAR transaction actions; they do **not** restrict off-chain intent signatures from a key registered with `intents.near`. The requested signer restriction is therefore not claimed. A malicious or compromised registered key could bypass this vault's view check. See [research](docs/RESEARCH.md).
 - **Sputnik DAO:** not integrated. The prototype uses a native one-day majority share vote and locks withdrawals while a vote is open. A real DAO integration requires a DAO account and a tested executor design.
-- **1Click and Pyth:** not used at runtime. No rebalancing or price-guard claim is made. These require approved credentials, asset feed mapping, and a safe execution path.
+- **1Click and price guard:** not used at runtime. No rebalancing or price-guard claim is made. Pyth Core has ended NEAR support, so a guard would use the Rhea price oracle on mainnet and a signed relayer price on testnet; both need verification and a safe execution path.
 
 No mainnet signing, spending, or deployment was performed. This repository is local only; it has no remote and has not been pushed or published.
 

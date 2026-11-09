@@ -146,10 +146,10 @@ export default function Landing(){
           <footer>see docs/RESEARCH.md</footer>
         </article>
         <article className="tcard">
-          <header><Icon name="eye"/><Chip tone="warn">Setup required: PYTH_API_KEY</Chip></header>
-          <h3>Pyth toxicity guard</h3>
-          <p>Before quoting, compare the request against a fresh Pyth price and refuse when the requester knows something the book does not. Planned; it needs an API key and a feed map.</p>
-          <footer>not used at runtime</footer>
+          <header><Icon name="eye"/><Chip>Not built</Chip></header>
+          <h3>Price guard</h3>
+          <p>Before quoting, compare the request with a fresh price and refuse flow that knows more than the book. Pyth Core has ended NEAR support (<code>pyth-oracle.testnet</code> returns null), so the plan is the Rhea price oracle on mainnet and a signed relayer price on testnet. Neither is built; no price is read today.</p>
+          <footer>Rhea oracle on mainnet · relayer price on testnet · not built</footer>
         </article>
         <article className="tcard">
           <header><Icon name="layers"/><Chip tone="live">Live on testnet</Chip></header>
