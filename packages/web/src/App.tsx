@@ -1,50 +1,82 @@
 import {useCallback,useEffect,useState} from 'react';
 import {setupWalletSelector,type BrowserWallet,type WalletSelector} from '@near-wallet-selector/core';
 import {setupMyNearWallet} from '@near-wallet-selector/my-near-wallet';
-import {decimal,rawUnits,solverState,usdcId,vaultId,view,type Constitution,type Proposal,type SolverState,type VaultState} from './rpc';
+import Landing from './Landing';
+import Terminal from './Terminal';
+import {navigate,nearblocksAccount,short,vaultId} from './rpc';
+import {Chip,Icon,Mark} from './ui';
 
 const gas='100000000000000';
-const explorer=(hash:string)=>`https://testnet.nearblocks.io/txns/${hash}`;
-const short=(value:string)=>value.length>22?`${value.slice(0,13)}…${value.slice(-7)}`:value;
-function Notice({children,error=false}:{children:React.ReactNode;error?:boolean}){return <div className={`notice ${error?'error':''}`} role={error?'alert':'status'}>{children}</div>}
+
+export type Wallet={
+  account:string;ready:boolean;busy:boolean;
+  connect:()=>Promise<void>;disconnect:()=>Promise<void>;
+  /** Signs one function call on testnet through MyNearWallet and returns the transaction hash. */
+  call:(method:string,args:object,opts?:{deposit?:string;receiver?:string})=>Promise<string>;
+};
+
+function useRoute(){
+  const [path,setPath]=useState(location.pathname);
+  useEffect(()=>{const on=()=>setPath(location.pathname);addEventListener('popstate',on);return()=>removeEventListener('popstate',on);},[]);
+  return path.startsWith('/app')?'app':'home';
+}
+
 export default function App(){
+  const route=useRoute();
   const [selector,setSelector]=useState<WalletSelector|null>(null);
   const [account,setAccount]=useState('');
-  const [vault,setVault]=useState<VaultState|null>(null);
-  const [shares,setShares]=useState('0');
-  const [proposals,setProposals]=useState<Proposal[]>([]);
-  const [solver,setSolver]=useState<SolverState|null>(null);
-  const [chainError,setChainError]=useState('');
-  const [solverError,setSolverError]=useState('');
-  const [actionError,setActionError]=useState('');
-  const [tx,setTx]=useState('');
   const [busy,setBusy]=useState(false);
-  const [amount,setAmount]=useState('');
-  const [shareAmount,setShareAmount]=useState('');
-  const [draft,setDraft]=useState<Constitution>({allowed_pairs:[],max_inventory_usdc:'0',min_spread_bps:30,daily_loss_limit_usdc:'0'});
-  const [pairs,setPairs]=useState('');
-  const [cap,setCap]=useState('');
-  const [loss,setLoss]=useState('');
-  const [lastRefresh,setLastRefresh]=useState('');
-  const refresh=useCallback(async()=>{
-    if(vaultId){try{const [state,votes]=await Promise.all([view<VaultState>(vaultId,'state'),view<Proposal[]>(vaultId,'proposals')]);setVault(state);setProposals(votes);setDraft(state.constitution);setPairs(state.constitution.allowed_pairs.join('\n'));setCap(decimal(state.constitution.max_inventory_usdc));setLoss(decimal(state.constitution.daily_loss_limit_usdc));setChainError('');if(account)setShares(await view<string>(vaultId,'shares_of',{account_id:account}));}catch(e){setChainError((e as Error).message);}}
-    try{setSolver(await solverState());setSolverError('');}catch(e){setSolver(null);setSolverError((e as Error).message);}
-    setLastRefresh(new Date().toLocaleTimeString());
-  },[account]);
-  useEffect(()=>{setupWalletSelector({network:'testnet',modules:[setupMyNearWallet()]}).then(async s=>{setSelector(s);const w=await s.wallet('my-near-wallet');setAccount((await w.getAccounts())[0]?.accountId||'');}).catch(e=>setActionError((e as Error).message));},[]);
-  useEffect(()=>{void refresh();const timer=setInterval(()=>void refresh(),15000);return()=>clearInterval(timer)},[refresh]);
-  async function run(method:string,args:object,deposit='0',receiver=vaultId){setActionError('');setTx('');setBusy(true);try{if(!receiver)throw new Error('Setup required: VITE_VAULT_ACCOUNT');if(!selector||!account)throw new Error('Connect a NEAR testnet wallet');const wallet=await selector.wallet('my-near-wallet');const result=await wallet.signAndSendTransaction({receiverId:receiver,actions:[{type:'FunctionCall',params:{methodName:method,args,gas,deposit}}]});if(!result)throw new Error('Wallet did not return a transaction result');if(typeof result.status==='object' && result.status!==null && 'Failure' in result.status)throw new Error(JSON.stringify(result.status.Failure));if(result.transaction?.hash)setTx(result.transaction.hash);await refresh();}catch(e){setActionError((e as Error).message)}finally{setBusy(false)}}
-  async function connect(){setActionError('');try{if(!vaultId)throw new Error('Setup required: VITE_VAULT_ACCOUNT');if(!selector)throw new Error('Wallet is loading');const w=await selector.wallet('my-near-wallet') as BrowserWallet;setAccount((await w.signIn({contractId:vaultId}))[0]?.accountId||'')}catch(e){setActionError((e as Error).message)}}
-  async function deposit(){try{if(!usdcId)throw new Error('Setup required: VITE_USDC_ACCOUNT');if(!vaultId)throw new Error('Setup required: VITE_VAULT_ACCOUNT');await run('ft_transfer_call',{receiver_id:vaultId,amount:rawUnits(amount),msg:''},'1',usdcId)}catch(e){setActionError((e as Error).message)}}
-  async function withdraw(){try{await run('withdraw',{shares:rawUnits(shareAmount)})}catch(e){setActionError((e as Error).message)}}
-  async function propose(){try{await run('propose',{constitution:{allowed_pairs:pairs.split('\n').map(x=>x.trim()).filter(Boolean),max_inventory_usdc:rawUnits(cap),min_spread_bps:Number(draft.min_spread_bps),daily_loss_limit_usdc:rawUnits(loss)}})}catch(e){setActionError((e as Error).message)}}
-  const nav=vault&&BigInt(vault.total_shares)>0n?Number(BigInt(vault.usdc_balance)*1_000_000n/BigInt(vault.total_shares))/1_000_000:1;
-  return <><header className="topbar"><a className="brand" href="#top"><span className="brand-mark">黒</span><span>KUROKO<small>THE STAGEHAND</small></span></a><nav><a href="#tape">Live tape</a><a href="#vault">Vault</a><a href="#constitution">Constitution</a><a href="#fills">Fills</a></nav><button className="connect" onClick={connect} disabled={!selector||busy}>{account?short(account):'Connect testnet wallet'}</button></header>
-  <main id="top"><section className="hero"><div className="hero-copy"><p className="eyebrow"><span className="signal"/> NEAR INTENTS · BUSINESS / DEFI</p><h1>The market maker <em>behind</em> the trade.</h1><p className="lede">A vault for shared liquidity, governed by depositors. Kuroko watches the solver relay and evaluates requests against a constitution. Live quoting remains disabled until relay access and a restricted custody design are verified.</p><div className="hero-actions"><a className="primary" href="#tape">See the live tape <span>↗</span></a><a href="#vault">Inspect the vault <span>↗</span></a></div></div><div className="stage" aria-hidden="true"><div className="stage-line one"/><div className="stage-line two"/><div className="stage-line three"/><div className="stage-cube"><span>黒</span></div><span className="stage-caption">THE INVISIBLE SIDE OF EVERY SWAP</span></div></section>
-  <section className="strip"><div><small>OPERATING MODE</small><strong>{solver?.mode==='listen'?'Listen only':'Setup required'}</strong></div><div><small>RELAY REQUESTS SEEN</small><strong>{solver?.requestsSeen.toLocaleString()??'—'}</strong></div><div><small>WOULD QUOTE</small><strong>{solver?.wouldQuote.toLocaleString()??'—'}</strong></div><div><small>VERIFIED FILLS</small><strong>{solver?.won.toLocaleString()??'0'}</strong></div></section>
-  <section className="section" id="tape"><div className="section-head"><div><p className="eyebrow">01 / RELAY MONITOR</p><h2>Live quote requests</h2></div><button className="text-button" onClick={()=>void refresh()}>Refresh ↻</button></div><p className="section-intro">Requests appear here only when the authenticated relay has delivered them. “Would quote” is a local calculation; no response is sent in listen mode.</p>{solverError?<Notice error>Setup required: PARTNER_JWT. Start the local solver service after partner approval. {solverError}</Notice>:solver?.lastError?<Notice error>{solver.lastError}</Notice>:null}<div className="tape-table"><div className="table-head"><span>Time / quote ID</span><span>Pair</span><span>Requested</span><span>Kuroko evaluation</span></div>{solver?.tape?.length?solver.tape.slice().reverse().map(row=><div className="table-row" key={`${row.at}-${row.request.quote_id}`}><div><strong>{new Date(row.at).toLocaleTimeString()}</strong><small>{short(row.request.quote_id)}</small></div><div className="mono pair">{short(row.request.defuse_asset_identifier_in)}<span>→</span>{short(row.request.defuse_asset_identifier_out)}</div><div className="mono">{row.request.exact_amount_in||row.request.exact_amount_out||'—'} <small>raw units</small></div><div className="result">{typeof row.result.amount_out==='string'?`Would quote ${row.result.amount_out} raw units`:typeof row.result.reason==='string'?row.result.reason:'No quote'}</div></div>):<div className="empty">No relay requests captured. {solver?'Waiting for an eligible live request.':'Setup required: PARTNER_JWT and a running solver service.'}</div>}</div><p className="source">Source: authenticated NEAR Intents solver relay · local listen service{lastRefresh?` · refreshed ${lastRefresh}`:''}</p></section>
-  <section className="section vault-section" id="vault"><div className="section-head"><div><p className="eyebrow">02 / DEPOSITOR CAPITAL</p><h2>Vault &amp; NAV</h2></div><span className="pill">NEAR TESTNET</span></div>{!vaultId?<Notice error>Setup required: VITE_VAULT_ACCOUNT</Notice>:chainError?<Notice error>{chainError}</Notice>:null}<div className="vault-grid"><div className="metric-card"><small>VAULT USDC · CONTRACT STATE</small><strong>{vault?decimal(vault.usdc_balance):'—'}</strong><span>USDC raw balance held by the vault</span></div><div className="metric-card"><small>SHARE NAV · USDC</small><strong>{vault?nav.toFixed(6):'—'}</strong><span>Cash balance ÷ outstanding shares</span></div><div className="metric-card"><small>YOUR SHARES</small><strong>{account?decimal(shares):'Connect wallet'}</strong><span>{account?short(account):'NEAR testnet account required'}</span></div></div><p className="source">NAV source: `state` and `shares_of` on {vaultId||'the configured testnet vault'}. This cash-only prototype does not value off-contract inventory.</p><div className="action-grid"><div className="action-card"><h3>Deposit USDC</h3><p>NEP-141 `ft_transfer_call` mints vault shares after the token transfer reaches the contract.</p><label>USDC amount<input inputMode="decimal" placeholder="0.00" value={amount} onChange={e=>setAmount(e.target.value)}/></label><button onClick={deposit} disabled={busy||!account||!vaultId||!usdcId}>Deposit on testnet ↗</button>{!usdcId&&<small>Setup required: VITE_USDC_ACCOUNT</small>}</div><div className="action-card"><h3>Withdraw shares</h3><p>Burn shares at current cash NAV and transfer the corresponding USDC back to your wallet.</p><label>Shares<input inputMode="decimal" placeholder="0.00" value={shareAmount} onChange={e=>setShareAmount(e.target.value)}/></label><button onClick={withdraw} disabled={busy||!account||!vaultId}>Withdraw on testnet ↗</button></div></div>{actionError&&<Notice error>{actionError}</Notice>}{tx&&<Notice>Transaction confirmed: <a href={explorer(tx)} target="_blank" rel="noreferrer">{short(tx)} ↗</a></Notice>}</section>
-  <section className="section" id="constitution"><div className="section-head"><div><p className="eyebrow">03 / HUMAN CONSTRAINTS</p><h2>The constitution</h2></div><span className={`pill ${vault?.paused?'paused':''}`}>{vault?.paused?'Paused':'Vault policy'}</span></div><div className="constitution-grid"><div className="rules"><div><small>ALLOWED PAIRS</small><strong>{vault?.constitution.allowed_pairs.length??'—'}</strong><span>{vault?.constitution.allowed_pairs.join(', ')||'No pairs configured'}</span></div><div><small>MAX INVENTORY</small><strong>{vault?decimal(vault.constitution.max_inventory_usdc):'—'} <i>USDC</i></strong></div><div><small>MINIMUM SPREAD</small><strong>{vault?.constitution.min_spread_bps??'—'} <i>bps</i></strong></div><div><small>DAILY LOSS LIMIT</small><strong>{vault?decimal(vault.constitution.daily_loss_limit_usdc):'—'} <i>USDC</i></strong><span>Recorded today: {vault?decimal(vault.daily_loss_usdc):'—'} USDC</span></div></div><div className="proposal-card"><h3>Propose a change</h3><p>Shareholders vote on a complete replacement policy. A vote lasts 24 hours; withdrawals are locked while it is open.</p><label>Allowed pairs · one per line<textarea rows={3} value={pairs} onChange={e=>setPairs(e.target.value)}/></label><div className="form-grid"><label>Max inventory · USDC<input inputMode="decimal" value={cap} onChange={e=>setCap(e.target.value)}/></label><label>Min spread · bps<input inputMode="numeric" type="number" min="0" max="9999" value={draft.min_spread_bps} onChange={e=>setDraft({...draft,min_spread_bps:Number(e.target.value)})}/></label></div><label>Daily loss limit · USDC<input inputMode="decimal" value={loss} onChange={e=>setLoss(e.target.value)}/></label><button onClick={propose} disabled={busy||!account||!vaultId}>Propose on testnet ↗</button></div></div><div className="votes"><h3>Shareholder votes</h3>{proposals.length?proposals.slice().reverse().map(p=><div className="vote" key={p.id}><div><strong>Proposal #{p.id}</strong><small>{p.executed?'Executed':Date.now()<p.closes_at_ms?`Open until ${new Date(p.closes_at_ms).toLocaleString()}`:'Ready to execute'}</small></div><div className="vote-count">Yes {decimal(p.yes)} · No {decimal(p.no)}</div><div className="vote-actions"><button disabled={busy||!account||p.executed||Date.now()>=p.closes_at_ms} onClick={()=>void run('vote',{id:p.id,yes:true})}>Vote yes</button><button disabled={busy||!account||p.executed||Date.now()>=p.closes_at_ms} onClick={()=>void run('vote',{id:p.id,yes:false})}>Vote no</button><button disabled={busy||p.executed||Date.now()<p.closes_at_ms} onClick={()=>void run('execute',{id:p.id})}>Execute</button></div></div>):<div className="empty">No proposals on the configured vault.</div>}</div><p className="source">Governance source: testnet vault contract. Sputnik DAO integration is pending; these votes are native vault shareholder votes.</p></section>
-  <section className="section fills-section" id="fills"><div className="section-head"><div><p className="eyebrow">04 / SETTLEMENT EVIDENCE</p><h2>Fills ledger</h2></div><span className="pill">VERIFIED ONLY</span></div><div className="empty">No verified Kuroko fills. The solver runs in listen mode and sends no quotes. A fill will appear only after a real mainnet settlement transaction can be re-queried.</div><p className="source">No spread or revenue is claimed before an independently verifiable `intents.near` transaction.</p></section>
-  </main><footer><span className="footer-brand">黒子 / KUROKO</span><span>Human limits. Observable execution.</span><a href="https://docs.near-intents.org/integration/market-makers/introduction" target="_blank" rel="noreferrer">Protocol documentation ↗</a></footer></>;
+  const [walletError,setWalletError]=useState('');
+
+  useEffect(()=>{setupWalletSelector({network:'testnet',modules:[setupMyNearWallet()]}).then(async s=>{setSelector(s);const w=await s.wallet('my-near-wallet');setAccount((await w.getAccounts())[0]?.accountId||'');}).catch(e=>setWalletError((e as Error).message));},[]);
+  useEffect(()=>{document.title=route==='app'?'Kuroko · Terminal':'Kuroko · The market maker behind the trade';},[route]);
+
+  const connect=useCallback(async()=>{
+    setWalletError('');
+    try{if(!vaultId)throw new Error('Setup required: VITE_VAULT_ACCOUNT');if(!selector)throw new Error('Wallet is still loading');const w=await selector.wallet('my-near-wallet') as BrowserWallet;setAccount((await w.signIn({contractId:vaultId}))[0]?.accountId||'');}
+    catch(e){setWalletError((e as Error).message);}
+  },[selector]);
+  const disconnect=useCallback(async()=>{if(!selector)return;const w=await selector.wallet('my-near-wallet');await w.signOut();setAccount('');},[selector]);
+  const call=useCallback(async(method:string,args:object,opts:{deposit?:string;receiver?:string}={})=>{
+    const receiver=opts.receiver??vaultId;
+    if(!receiver)throw new Error('Setup required: VITE_VAULT_ACCOUNT');
+    if(!selector||!account)throw new Error('Connect a NEAR testnet wallet first');
+    setBusy(true);
+    try{
+      const wallet=await selector.wallet('my-near-wallet');
+      const result=await wallet.signAndSendTransaction({receiverId:receiver,actions:[{type:'FunctionCall',params:{methodName:method,args,gas,deposit:opts.deposit??'0'}}]});
+      if(!result)throw new Error('The wallet returned no transaction result');
+      if(typeof result.status==='object'&&result.status!==null&&'Failure' in result.status)throw new Error(`Transaction failed: ${JSON.stringify(result.status.Failure)}`);
+      return result.transaction?.hash||'';
+    }finally{setBusy(false);}
+  },[selector,account]);
+  const wallet:Wallet={account,ready:!!selector,busy,connect,disconnect,call};
+  const go=(path:string)=>(e:React.MouseEvent)=>{e.preventDefault();navigate(path);};
+
+  return <div className={`shell route-${route}`}>
+    <header className="topbar">
+      <a className="brand" href="/" onClick={go('/')} aria-label="Kuroko home"><Mark/><span className="brand-word">Kuroko<small>黒子 · the stagehand</small></span></a>
+      {route==='home'
+        ?<nav className="topnav" aria-label="Sections"><a href="#earn">How it earns</a><a href="#constitution">Constitution</a><a href="#proof">Live proof</a><a href="#tech">NEAR tech</a></nav>
+        :<nav className="topnav" aria-label="Pages"><a href="/" onClick={go('/')}>Overview</a><a href="/app" aria-current="page" onClick={go('/app')}>Terminal</a></nav>}
+      <div className="topbar-end">
+        <span className="net"><i/>Testnet</span>
+        {route==='home'
+          ?<a className="btn btn-primary btn-sm" href="/app" onClick={go('/app')}>Open terminal <Icon name="arrow" size={16}/></a>
+          :account
+            ?<button className="btn btn-ghost btn-sm acct" onClick={()=>void disconnect()} title="Disconnect wallet"><Icon name="wallet" size={16}/>{short(account,12,6)}</button>
+            :<button className="btn btn-primary btn-sm" onClick={()=>void connect()} disabled={!selector}><Icon name="wallet" size={16}/>Connect wallet</button>}
+      </div>
+    </header>
+    {walletError&&<p className="banner-error" role="alert"><Icon name="x" size={16}/>{walletError}</p>}
+    <main>{route==='app'?<Terminal wallet={wallet}/>:<Landing/>}</main>
+    <footer className="foot">
+      <div className="foot-brand"><Mark size="sm"/><div><b>Kuroko</b><span>A depositor-governed NEAR Intents solver vault. Testnet prototype; quoting is off.</span></div></div>
+      <div className="foot-links">
+        {vaultId?<a href={nearblocksAccount(vaultId)} target="_blank" rel="noreferrer">Vault on NearBlocks <Icon name="external" size={14}/></a>:<Chip tone="warn">Setup required: VITE_VAULT_ACCOUNT</Chip>}
+        <a href="https://docs.near-intents.org/integration/market-makers/introduction" target="_blank" rel="noreferrer">Market-maker docs <Icon name="external" size={14}/></a>
+        <span>MIT · © 2026 Nivesh Gajengi</span>
+      </div>
+    </footer>
+  </div>;
 }
