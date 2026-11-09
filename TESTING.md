@@ -1,35 +1,22 @@
 # Testing — 2026-11-09
 
-Run from a clean clone with Node 26, pnpm 10.29.2, Rust 1.95.0 and cargo-near 0.22.0:
+Command run from the repository root:
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm test
-pnpm build
+NEAR_SANDBOX_BIN=/Volumes/Extreme\ SSD/Projects/near-qday-recovery/.tools/near-sandbox-2.14.0-rc.4/near-sandbox pnpm test
 ```
 
-`pnpm test` builds both WASM contracts on the external project volume and runs the NEAR sandbox tests in sequence. No mainnet account or Partner JWT is needed for this gate.
-
-## Observed counts
-
-| Suite | Real tests passed | Failed | Skipped | Evidence |
+| Suite | Passed | Failed | Skipped | What it checked |
 | --- | ---: | ---: | ---: | --- |
-| NEAR vault Rust unit tests | 3 | 0 | 0 | Share minting at NAV, proportional withdrawal math, vote weight reuse |
-| NEAR sandbox integration tests | 3 | 0 | 0 | Real nearcore sandbox receipts for forged deposit, unauthorized loss/withdrawal, constitution limits, daily pause, NEP-141 deposit and withdrawal |
-| TypeScript SDK | 5 | 0 | 0 | Integer AMM math, exact-output rounding, pair and inventory refusal, missing-inventory setup reason |
-| Solver service | 1 | 0 | 0 | Listen mode refuses to run without relay credential |
-| MCP server | 1 | 0 | 0 | Missing vault account produces a setup error instead of fabricated state |
-| Web | 0 | 0 | 0 | TypeScript check and Vite production build pass; no browser test was claimed |
-| **Total** | **13** | **0** | **0** | `pnpm test`, 2026-11-09 |
+| SDK (`tsx --test`) | 5 | 0 | 0 | Integer quote math, exact-output rounding, policy rejection, missing inventory |
+| Solver (`tsx --test`) | 1 | 0 | 0 | Missing Partner JWT produces an explicit setup error before network access |
+| MCP (`tsx --test`) | 1 | 0 | 0 | Missing vault account is surfaced rather than invented |
+| Contract unit (`cargo test`) | 3 | 0 | 0 | Share mint/burn arithmetic and vote weight |
+| Vault sandbox (`near-workspaces`) | 2 | 0 | 0 | Signed calls reject forged deposit, unauthorized loss report and non-shareholder withdrawal; constitution checks and loss pause |
+| Asset sandbox (`near-workspaces`) | 1 | 0 | 0 | Real local NEP-141 token transfer, share mint, withdrawal and token balance reconciliation |
+| Web | TypeScript pass | 0 | 0 | `tsc --noEmit`; production `pnpm --filter @kuroko/web build` also passed |
+| **Total executable tests** | **13** | **0** | **0** | Two sandbox suites run on real local nearcore |
 
-The `packages/contract/fixture-token` contract implements actual NEP-141 `ft_transfer_call` and `ft_transfer` behavior on the local chain. The integration test deploys it and the vault to nearcore sandbox. The test caught an actual receiver argument mismatch: the receiver originally expected `_msg`, whereas NEP-141 sends `msg`. The fixed receiver minted shares on receipt and returned USDC on withdrawal. No RPC stubs are used.
+`pnpm test` completed with exit code 0. The test suite does not claim relay signing, a mainnet fill, Sputnik DAO, Pyth, or 1Click execution. Those require the conditions in [BLOCKED.md](BLOCKED.md). Visual inspection at 375px remains unverified because the browser access host was unavailable; CSS contains a mobile breakpoint but that is not visual proof.
 
-## Live testnet verification
-
-Deployment: [`FAAVdRMb8kf344BAUxuAjFuXmBnP9L71DjfsMAbbEsJ2`](https://testnet.nearblocks.io/txns/FAAVdRMb8kf344BAUxuAjFuXmBnP9L71DjfsMAbbEsJ2). The recorded [`deployments/testnet-2026-11-09.json`](deployments/testnet-2026-11-09.json) includes the account, WASM SHA-256, RPC URL, init transaction, and observed state. I re-queried `state` on `kuroko-f836334a.qday-bob-mw8rcsal.testnet` from `https://test.rpc.fastnear.com` at a final block; the vault still reported 0 shares, 0 USDC, active policy, and 30 bps minimum spread. `usdc.testnet` also answered `ft_metadata` as a six-decimal USDC NEP-141 contract. No testnet deposit transaction is claimed.
-
-## Checks that remain blocked
-
-The official relay requires `PARTNER_JWT`; an unauthenticated upgrade returned HTTP 401. Consequently there are no real quote request fixtures, no 30-minute capture, no relay-format signing test, and no proven wins or fills. The function-call-key constraint requested for the mainnet signer is not supported by the Verifier's key model. See [BLOCKED.md](BLOCKED.md) and [research](docs/RESEARCH.md). A local sandbox policy check is not proof that `intents.near` enforces that policy on an off-chain signed intent.
-
-The computer-use browser host was unavailable during this run, so 375 px layout was reviewed from CSS and build output but not visually verified in a browser. The Vite build emitted a large-chunk warning for the NEAR wallet dependencies; it completed successfully.
+A separate NEAR testnet deployment was independently re-queried by RPC: transaction [`FAAVdRMb8kf344BAUxuAjFuXmBnP9L71DjfsMAbbEsJ2`](https://testnet.nearblocks.io/txns/FAAVdRMb8kf344BAUxuAjFuXmBnP9L71DjfsMAbbEsJ2) returned success and the vault's `state` returned the constitution in [deployment evidence](deployments/testnet-2026-11-09.json).
