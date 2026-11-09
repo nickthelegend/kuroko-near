@@ -204,6 +204,12 @@ function ProposePanel({wallet,chain,locked,refresh}:{wallet:Wallet;chain:Chain|n
     }catch(err){setMsg({ok:false,text:(err as Error).message});}
   }
   const set=(k:'pairs'|'cap'|'spread'|'loss')=>(e:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>)=>setDraft(d=>d&&{...d,[k]:e.target.value});
+  const changes=c&&draft?[
+    {label:'Pairs',from:c.allowed_pairs.map(pairLabel).join(', '),to:draft.pairs.split('\n').map(x=>x.trim()).filter(Boolean).map(pairLabel).join(', ')||'none'},
+    {label:'Max inventory',from:`${decimal(c.max_inventory_usdc)} USDC`,to:`${draft.cap||'—'} USDC`},
+    {label:'Min spread',from:`${c.min_spread_bps} bps`,to:`${draft.spread||'—'} bps`},
+    {label:'Daily loss limit',from:`${decimal(c.daily_loss_limit_usdc)} USDC`,to:`${draft.loss||'—'} USDC`},
+  ].map(x=>({...x,changed:x.from!==x.to})):[];
   const reason=!wallet.account?'Connect a testnet wallet to propose':!isHolder?'Only shareholders can propose. Deposit USDC first.':locked?'A vote is already open':'';
   return <Panel className="p-propose" title="Propose a change" meta={<span className="stamp">full replacement · 24 h vote</span>}>
     <form className="propose" onSubmit={submit}>
@@ -213,7 +219,12 @@ function ProposePanel({wallet,chain,locked,refresh}:{wallet:Wallet;chain:Chain|n
         <label className="field"><span>Min spread</span><div className="unit-in"><input inputMode="numeric" value={draft?.spread??''} onChange={set('spread')}/><em>bps</em></div></label>
         <label className="field"><span>Daily loss</span><div className="unit-in"><input inputMode="decimal" value={draft?.loss??''} onChange={set('loss')}/><em>USDC</em></div></label>
       </div>
-      <button className="btn btn-primary wide" disabled={!!reason||wallet.busy||!draft}><Icon name="vote" size={16}/>{wallet.busy?'Waiting for wallet…':'Open the vote on testnet'}</button>
+      <div className="diff" aria-label="Changes against the current constitution">
+        <div className="diff-head"><span>Against current</span><span>{changes.filter(x=>x.changed).length} change{changes.filter(x=>x.changed).length===1?'':'s'}</span></div>
+        {changes.map(x=><div key={x.label} className={`diff-row${x.changed?' changed':''}`}><span>{x.label}</span><b>{x.changed&&<s>{x.from}</s>}{x.to}</b></div>)}
+      </div>
+      <div className="push"/>
+      <button className="btn btn-primary wide" disabled={!!reason||wallet.busy||!draft||!changes.some(x=>x.changed)}><Icon name="vote" size={16}/>{wallet.busy?'Waiting for wallet…':'Open the vote on testnet'}</button>
       {reason&&<p className="hint">{reason}</p>}
       {msg&&<p className={msg.ok?'pass':'fail'} role={msg.ok?'status':'alert'}><Icon name={msg.ok?'check':'x'} size={14}/>{msg.text}{msg.hash&&<> · <a href={nearblocksTx(msg.hash)} target="_blank" rel="noreferrer">{short(msg.hash,6,4)} <Icon name="external" size={12}/></a></>}</p>}
     </form>

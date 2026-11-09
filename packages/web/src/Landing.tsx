@@ -9,9 +9,12 @@ function OrderCards(){
     <span className="ocard oc-1"><b>BID</b><i/><i/><i/></span>
     <span className="ocard oc-2"><b>INTENT</b><i/><i/></span>
     <span className="ocard oc-3"><b>ASK</b><i/><i/><i/></span>
-    <svg className="kuroko-figure" viewBox="0 0 200 300" aria-hidden="true">
-      <defs><linearGradient id="rim" x1="0" x2="1"><stop offset="0" stopColor="#4fb3f2" stopOpacity=".9"/><stop offset=".35" stopColor="#4fb3f2" stopOpacity="0"/></linearGradient></defs>
-      <path d="M100 26c-30 0-44 26-42 58 1 16 7 28 14 34-28 8-48 33-53 84l-5 98h172l-5-98c-5-51-25-76-53-84 7-6 13-18 14-34 2-32-12-58-42-58Z" fill="#060607" stroke="url(#rim)" strokeWidth="2"/>
+    <svg className="kuroko-figure" viewBox="0 0 220 300" aria-hidden="true">
+      <defs>
+        <linearGradient id="kf-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#09090b"/><stop offset=".75" stopColor="#09090b"/><stop offset="1" stopColor="#09090b" stopOpacity="0"/></linearGradient>
+        <linearGradient id="kf-rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#8fd0fa" stopOpacity=".95"/><stop offset=".6" stopColor="#4fb3f2" stopOpacity=".35"/><stop offset="1" stopColor="#4fb3f2" stopOpacity="0"/></linearGradient>
+      </defs>
+      <path d="M104 16c-26 3-42 24-43 52-1 20 5 36 16 46-28 8-46 30-52 66L16 300h188l-9-120c-6-36-24-58-52-66 11-10 16-26 15-46-1-30-20-54-54-52Z" fill="url(#kf-fill)" stroke="url(#kf-rim)" strokeWidth="1.6"/>
     </svg>
   </div>;
 }
@@ -89,7 +92,7 @@ export default function Landing(){
           <h2>Three beats. <span>The stagehand never takes a bow.</span></h2>
           <p className="sec-lede">In kabuki the kuroko moves the scenery in plain sight and the audience agrees not to see them. A solver does the same for a swap.</p>
         </div>
-        <Art name="kuroko-feature-stage" className="feature-art"/>
+        <Art name="kuroko-feature-stage" className="feature-art"><div className="lineup"><span className="ocard"><b>I · ASK</b><i/><i/><i/></span><span className="ocard"><b>II · QUOTE</b><i/><i/><i/></span><span className="ocard"><b>III · SETTLE</b><i/><i/></span></div></Art>
       </div>
       <ol className="beats">
         <li><span className="beat-n">I</span><h3>A request walks on</h3><p>A user asks NEAR Intents to swap. The solver relay broadcasts the request to market makers who hold relay access.</p><code>quote · nep141 in → out</code></li>
