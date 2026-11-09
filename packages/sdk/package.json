@@ -1,0 +1,1 @@
+{"name":"@kuroko/sdk","version":"0.1.0","type":"module","main":"./src/index.ts","scripts":{"build":"tsc --noEmit","test":"tsx --test src/index.test.ts"},"dependencies":{},"devDependencies":{"typescript":"^5.9.3","tsx":"^4.20.6","@types/node":"^26.0.0"}}
