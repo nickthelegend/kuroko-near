@@ -45,7 +45,7 @@ export function Num({value,unit,dim}:{value:string|null;unit?:string;dim?:boolea
 export function Art({name,className='',children}:{name:string;className?:string;children?:ReactNode}){
   const has=artFiles.includes(`${name}.webp`);
   return <div className={`art ${has?'art-real':'art-stage'} ${className}`} aria-hidden="true">
-    {has?<img src={`/art/${name}.webp`} alt="" loading={name.endsWith('hero')?'eager':'lazy'}/>:<StagePlaceholder>{children}</StagePlaceholder>}
+    {has?<img src={`/art/${name}.webp`} alt="" decoding="async"/>:<StagePlaceholder>{children}</StagePlaceholder>}
   </div>;
 }
 function StagePlaceholder({children}:{children?:ReactNode}){
