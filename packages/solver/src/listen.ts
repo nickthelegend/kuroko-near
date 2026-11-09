@@ -7,7 +7,6 @@ import {evaluate, type QuoteRequest, type Constitution} from '@kuroko/sdk';
 const jwt=process.env.PARTNER_JWT;
 if (!jwt) { console.error('Setup required: PARTNER_JWT'); process.exit(2); }
 const account=process.env.NEAR_MAINNET_ACCOUNT;
-if (!account) { console.error('Setup required: NEAR_MAINNET_ACCOUNT'); process.exit(2); }
 const assetIn=process.env.KUROKO_ASSET_IN;
 const assetOut=process.env.KUROKO_ASSET_OUT;
 if (!assetIn || !assetOut) { console.error('Setup required: KUROKO_ASSET_IN, KUROKO_ASSET_OUT'); process.exit(2); }
@@ -23,6 +22,7 @@ const date=startedAt.slice(0,10);
 const server=createServer((req,res)=>{res.setHeader('Access-Control-Allow-Origin','*');res.setHeader('Content-Type','application/json');if(req.url==='/health'||req.url==='/stats')res.end(JSON.stringify({...stats,tape:tape.slice(-50)}));else{res.statusCode=404;res.end(JSON.stringify({error:'not found'}));}});
 server.listen(Number(process.env.PORT || 3100),'127.0.0.1');
 async function balances(): Promise<Record<string,string>> {
+  if(!account) throw Error('Setup required: NEAR_MAINNET_ACCOUNT');
   const args=Buffer.from(JSON.stringify({account_id:account,token_ids:[tokenIn,tokenOut]})).toString('base64');
   const response=await fetch('https://rpc.fastnear.com',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:'kuroko',method:'query',params:{request_type:'call_function',finality:'final',account_id:'intents.near',method_name:'mt_batch_balance_of',args_base64:args}})});
   if(!response.ok) throw Error(`RPC HTTP ${response.status}`);
@@ -40,10 +40,11 @@ async function connect(){
   ws.on('open',()=>{console.log('relay connected: listen mode');ws?.send(JSON.stringify({jsonrpc:'2.0',id:1,method:'subscribe',params:['quote',{tokens_in:[tokenIn,tokenOut],tokens_out:[tokenIn,tokenOut]}]}));});
   let subscription='';
   ws.on('message',async raw=>{try{
-    const msg=JSON.parse(String(raw)) as {id?:number,result?:string,error?:unknown,method?:string,params?:{subscription?:string,data?:QuoteRequest}};
+    const msg=JSON.parse(String(raw)) as {id?:number,result?:string,error?:unknown,method?:string,params?:{subscription?:string,data?:QuoteRequest,quote_id?:string}};
     if(msg.id===1){if(msg.error)throw Error(`subscribe rejected: ${JSON.stringify(msg.error)}`);subscription=msg.result || '';if(!subscription)throw Error('missing subscription ID');console.log('quote subscription active');return;}
-    if(msg.method!=='event'||msg.params?.subscription!==subscription||!msg.params.data)return;
-    const request=msg.params.data;
+    if((msg.method!=='event'&&msg.method!=='subscribe')||msg.params?.subscription!==subscription)return;
+    const request=(msg.method==='event'?msg.params.data:msg.params) as QuoteRequest|undefined;
+    if(!request)return;
     if(typeof request.quote_id!=='string'||typeof request.defuse_asset_identifier_in!=='string')return;
     stats.requestsSeen++;
     if(stats.requestsSeen%20===1) {try{stats.inventory=await balances();}catch(e){stats.lastError=String(e);}}
