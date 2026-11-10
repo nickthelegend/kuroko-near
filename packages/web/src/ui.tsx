@@ -65,12 +65,12 @@ export function ValueChart({points,metric}:{points:Point[];metric:'cash'|'price'
   const W=720,H=240,P={l:8,r:8,t:16,b:28};
   if(!points.length)return <div className="chart-empty"><Icon name="pulse"/>No deposits yet, so there is nothing to chart.</div>;
   const now=Date.now();
-  const t0=points[0].at,t1=Math.max(now,points[points.length-1].at+1);
+  const first=points[0].at,t1=Math.max(now,points[points.length-1].at+1);const t0=first-Math.max(60_000,(t1-first)*0.06);
   const val=(p:Point)=>Number(metric==='cash'?p.cash:p.price)/1e6;
-  const vals=points.map(val);const max=Math.max(...vals,metric==='price'?1.02:0.000001);const min=metric==='price'?Math.min(...vals,0.98):0;
+  const vals=points.map(val);const max=Math.max(...vals,metric==='price'?1.02:0.000001)*(metric==='cash'?1.18:1);const min=metric==='price'?Math.min(...vals,0.98):0;
   const x=(t:number)=>P.l+(t-t0)/(t1-t0)*(W-P.l-P.r);
   const y=(v:number)=>P.t+(1-(v-min)/(max-min||1))*(H-P.t-P.b);
-  let d=`M${x(t0)},${y(metric==='cash'?0:vals[0])}`;
+  let d=`M${x(t0)},${y(metric==='cash'?0:vals[0])}`;void first;
   points.forEach((p,i)=>{d+=` L${x(p.at)},${y(i===0&&metric==='cash'?0:vals[i-1]??vals[0])} L${x(p.at)},${y(vals[i])}`;});
   d+=` L${x(t1)},${y(vals[vals.length-1])}`;
   const area=`${d} L${x(t1)},${H-P.b} L${x(t0)},${H-P.b} Z`;
@@ -83,14 +83,14 @@ export function ValueChart({points,metric}:{points:Point[];metric:'cash'|'price'
       <path d={d} className="line" fill="none" vectorEffect="non-scaling-stroke"/>
       {points.map((p,i)=><circle key={i} cx={x(p.at)} cy={y(vals[i])} r="4" className="dot" vectorEffect="non-scaling-stroke"/>)}
     </svg>
-    <figcaption><span>{fmt(t0)}</span><span>now</span></figcaption>
+    <figcaption><span>{fmt(first)}</span><span>now</span></figcaption>
   </figure>;
 }
 
 /** Framed art, or a designed gradient placeholder until the file exists. */
 export function Art({name,className=''}:{name:string;className?:string}){
   const has=artFiles.includes(`${name}.webp`);
-  return <div className={`art ${has?'art-real':'art-ph'} ${className}`} aria-hidden="true">{has&&<img src={`/art/${name}.webp`} alt="" decoding="async"/>}</div>;
+  return <div className={`art ${has?'art-real':'art-ph'} ${className}`} aria-hidden="true">{has&&<img src={`/art/${name}.webp`} alt=""/>}</div>;
 }
 
 export function Empty({icon='pulse',title,children,action}:{icon?:IconName;title:string;children?:ReactNode;action?:ReactNode}){

@@ -17,13 +17,19 @@ pnpm test
 | Web | TypeScript pass | 0 | 0 | `tsc --noEmit`; production `pnpm --filter @kuroko/web build` also passed |
 | **Total executable tests** | **13** | **0** | **0** | Two sandbox suites run on real local nearcore |
 
-`pnpm test` completed with exit code 0 without an environment override. The sandbox binary was loaded from this repository’s gitignored `.tools/` directory. The test suite does not claim relay signing, a mainnet fill, Sputnik DAO, Pyth, or 1Click execution. Those require the conditions in [BLOCKED.md](BLOCKED.md). Browser check (2026-11-09, production build via `vite preview`, headless Chrome through playwright-core, `VITE_VAULT_ACCOUNT=kuroko-f836334a.qday-bob-mw8rcsal.testnet VITE_USDC_ACCOUNT=usdc.testnet`):
+`pnpm test` completed with exit code 0 without an environment override. The sandbox binary was loaded from this repository’s gitignored `.tools/` directory. The test suite does not claim relay signing, a mainnet fill, Sputnik DAO, Pyth, or 1Click execution. Those require the conditions in [BLOCKED.md](BLOCKED.md). Browser check (2026-11-10, after the web redesign; production build via `vite preview` on port 5371, headless Chrome through playwright-core, no env: the web reads the recorded live vault `kuroko-v-83692eef.testnet`):
 
-| Route | 1440×900 | 390×844 | 375×812 | Page errors | Horizontal overflow |
-| --- | --- | --- | --- | --- | --- |
-| `/` landing | renders | renders | renders | 0 | 0 px |
-| `/app` terminal | renders | renders | renders | 0 | 0 px |
+| Route | 1440×900 | 375×812 | Page or console errors | Horizontal overflow |
+| --- | --- | --- | --- | --- |
+| `/` landing | renders | renders | 0 | 0 px |
+| `/vault` | renders | renders | 0 | 0 px |
+| `/position` (no wallet) | renders | renders | 0 | 0 px |
+| `/position?account=kuroko-lp-346fc6f5.testnet` | renders | renders | 0 | 0 px |
 
-The only console message is `ERR_CONNECTION_REFUSED` for `127.0.0.1:3100/stats`: the local listen service is not running because `PARTNER_JWT` is absent, and the tape shows **Setup required: PARTNER_JWT**. The landing's "Ask the vault" form called the testnet `check_trade` view: `USDC / wNEAR · 0.5 USDC · 30 bps` returned **Passes**, and the unlisted `USDC / ETH` pair returned **Refused**.
+- Live data on screen matched RPC: vault 0.30 USDC and 0.30 shares; the replayed history shows the 0.50 USDC deposit and 0.20 USDC withdrawal with their NearBlocks links; the read-only position shows 0.3000 USDC, 100.00% of the vault, net deposited 0.3000 USDC, earned 0.0000.
+- The `/vault` "Would the rules allow this trade?" form called `check_trade` on testnet: USDC ↔ wNEAR, 0.5 USDC, 0.30% returned **Allowed**; by RPC the unlisted USDC ↔ ETH pair and a 10 bps fee both return `false`.
+- With `prefers-reduced-motion: reduce` animations compute to `none` and the count-ups render their final value. Keyboard Tab shows a 2 px persimmon focus outline. Tap targets are 44 px or taller.
+- The page makes no request to `127.0.0.1:3100` unless built with `VITE_SOLVER_API`, so the old `ERR_CONNECTION_REFUSED` console message is gone; Recent fills shows **Setup required: PARTNER_JWT**.
+- NearBlocks' public API was rate-limited (HTTP 429) during this session, so history is read from FastNEAR's testnet transaction index (`tx.test.fastnear.com`) and the NEP-141 events inside each transaction; links still point to NearBlocks.
 
-A separate NEAR testnet deployment was independently re-queried by RPC: transaction [`FAAVdRMb8kf344BAUxuAjFuXmBnP9L71DjfsMAbbEsJ2`](https://testnet.nearblocks.io/txns/FAAVdRMb8kf344BAUxuAjFuXmBnP9L71DjfsMAbbEsJ2) returned success and the vault's `state` returned the constitution in [deployment evidence](deployments/testnet-2026-11-09.json).
+Previous browser check (2026-11-09) covered the old landing and `/app` terminal against the first, empty `usdc.testnet` deployment.

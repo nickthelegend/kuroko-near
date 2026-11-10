@@ -34,7 +34,7 @@ export default function VaultPage({data,wallet}:{data:Data;wallet:Wallet}){
         <div className="kpis">
           <div className="kpi"><span>Vault USDC</span><CountUp value={v?usdNumber(v.usdc_balance):null} decimals={2}/><small>total value locked</small></div>
           <div className="kpi"><span>Share price</span><CountUp value={v?usdNumber(sharePrice(v.usdc_balance,v.total_shares)):null} decimals={4}/><small>USDC per share</small></div>
-          <div className="kpi"><span>Earned from fills</span><CountUp value={0} decimals={2}/><small>no swaps filled yet</small></div>
+          <div className="kpi"><span>Earned</span><CountUp value={0} decimals={2}/><small>from fills · none yet</small></div>
           <div className="kpi"><span>APY</span><span className="num num-empty">—</span><small>needs real fills to measure</small></div>
         </div>
         {data.vault.state==='error'&&<p className="inline-error" role="alert"><Icon name="x" size={16}/>{data.vault.message}</p>}
