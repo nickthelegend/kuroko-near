@@ -1,0 +1,87 @@
+{
+  "network": "testnet",
+  "rpcUrl": "https://test.rpc.fastnear.com",
+  "usdc": "3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af",
+  "pool": {
+    "ref": "ref-finance-101.testnet",
+    "id": 1845
+  },
+  "steps": [
+    {
+      "label": "deploy",
+      "hash": "iYayUZVzWXJCLUMDkuRLGWx5UurrUhddtXSEafHNo2Y",
+      "explorer": "https://testnet.nearblocks.io/txns/iYayUZVzWXJCLUMDkuRLGWx5UurrUhddtXSEafHNo2Y",
+      "at": "2026-11-10T05:02:32.907Z",
+      "wasmSha256": "924312053f4ba27e5206fb42f8400d34792a6654a18caaea5c245efdc1c02442"
+    },
+    {
+      "label": "register vault with USDC",
+      "hash": "AAdNCugC9hU1JN5Z6HythFB6mGnMqPtSyjUmDvGdR74u",
+      "explorer": "https://testnet.nearblocks.io/txns/AAdNCugC9hU1JN5Z6HythFB6mGnMqPtSyjUmDvGdR74u",
+      "at": "2026-11-10T05:02:37.075Z"
+    },
+    {
+      "label": "register depositor with USDC",
+      "hash": "BEpNmT1KGow6fr3ZtVicoVC2Yo45Z11XuEUQEde9s8rC",
+      "explorer": "https://testnet.nearblocks.io/txns/BEpNmT1KGow6fr3ZtVicoVC2Yo45Z11XuEUQEde9s8rC",
+      "at": "2026-11-10T05:02:41.423Z"
+    },
+    {
+      "label": "wrap NEAR",
+      "hash": "2XFmX5JysqKTBZVg8Jq9tztTH831CDxqmNdr1pwd1fAc",
+      "explorer": "https://testnet.nearblocks.io/txns/2XFmX5JysqKTBZVg8Jq9tztTH831CDxqmNdr1pwd1fAc",
+      "at": "2026-11-10T05:02:45.719Z",
+      "amount": "2 NEAR"
+    },
+    {
+      "label": "register depositor with Ref",
+      "hash": "FDxQ5TgrxBA4A7KSbPy7a2oQ4L2CdTnCqLTPzERnxHP",
+      "explorer": "https://testnet.nearblocks.io/txns/FDxQ5TgrxBA4A7KSbPy7a2oQ4L2CdTnCqLTPzERnxHP",
+      "at": "2026-11-10T05:02:50.139Z"
+    },
+    {
+      "label": "swap wNEAR for USDC on Ref",
+      "hash": "DmByBMyAse5ya1Uf71xDhM9bWJcXL3oUpR9GFHy8T8Tx",
+      "explorer": "https://testnet.nearblocks.io/txns/DmByBMyAse5ya1Uf71xDhM9bWJcXL3oUpR9GFHy8T8Tx",
+      "at": "2026-11-10T05:02:55.996Z",
+      "poolAmounts": [
+        "20631501236488062104057383",
+        "7181476"
+      ],
+      "expectedUsdc": "632908"
+    },
+    {
+      "label": "deposit",
+      "hash": "BkreUSyBXxX2qNjPFqZTwVFWdPseGiF4qQHErcW1Pcnq",
+      "explorer": "https://testnet.nearblocks.io/txns/BkreUSyBXxX2qNjPFqZTwVFWdPseGiF4qQHErcW1Pcnq",
+      "at": "2026-11-10T05:03:01.478Z",
+      "amount": "500000"
+    },
+    {
+      "label": "withdraw",
+      "hash": "4dZANf4GyFrjVXPUeZV6hmdWRXvqyXdPo8gDjC2NYXRh",
+      "explorer": "https://testnet.nearblocks.io/txns/4dZANf4GyFrjVXPUeZV6hmdWRXvqyXdPo8gDjC2NYXRh",
+      "at": "2026-11-10T05:03:06.795Z",
+      "shares": "200000"
+    }
+  ],
+  "vault": "kuroko-v-83692eef.testnet",
+  "lp": "kuroko-lp-346fc6f5.testnet",
+  "state": {
+    "total_shares": "300000",
+    "usdc_balance": "300000",
+    "paused": false,
+    "daily_loss_usdc": "0",
+    "loss_day": 0,
+    "constitution": {
+      "allowed_pairs": [
+        "nep141:3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af/nep141:wrap.testnet"
+      ],
+      "max_inventory_usdc": "1000000",
+      "min_spread_bps": 30,
+      "daily_loss_limit_usdc": "100000"
+    }
+  },
+  "depositorShares": "300000",
+  "observedAt": "2026-11-10T05:03:07.125Z"
+}
