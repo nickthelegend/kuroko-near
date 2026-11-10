@@ -27,10 +27,11 @@ export default function VaultPage({data,wallet}:{data:Data;wallet:Wallet}){
       </div>
       <p className="vh-desc">Deposit USDC; Kuroko fills other people’s swaps on NEAR Intents and shares the fees with you.</p>
       <p className="vh-meta">
-        <span className={`dot ${v?.paused?'dot-bad':v?'dot-ok':''}`}/>{status}
+        <span className="nowrap"><span className={`dot ${v?.paused?'dot-bad':v?'dot-ok':''}`}/>{status}</span>
         <span className="sep" aria-hidden="true">·</span>
-        <a className="mono" href={nearblocksAccount(vaultId)} target="_blank" rel="noreferrer">{short(vaultId,10,8)}</a><Copy value={vaultId}/>
-        <span className="nowrap"><span className="sep" aria-hidden="true">·</span>NEAR testnet</span>
+        <span className="nowrap"><a className="mono" href={nearblocksAccount(vaultId)} target="_blank" rel="noreferrer">{short(vaultId,10,8)}</a><Copy value={vaultId}/></span>
+        <span className="sep" aria-hidden="true">·</span>
+        <span className="nowrap">NEAR testnet</span>
       </p>
     </header>
 
