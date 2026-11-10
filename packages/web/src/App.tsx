@@ -1,12 +1,11 @@
 import {useCallback,useEffect,useState} from 'react';
 import {setupWalletSelector,type BrowserWallet,type WalletSelector} from '@near-wallet-selector/core';
 import {setupMyNearWallet} from '@near-wallet-selector/my-near-wallet';
-import Landing from './Landing';
 import VaultPage from './Vault';
 import Position from './Position';
 import {loadHistory,type History} from './activity';
 import {loadVault,navigate,nearblocksAccount,short,vaultId,type VaultState} from './rpc';
-import {Icon,Mark,useLive,type Live} from './ui';
+import {Mark,useLive,type Live} from './ui';
 
 const gas='100000000000000';
 
@@ -17,14 +16,13 @@ export type Wallet={
   call:(method:string,args:object,opts?:{deposit?:string;receiver?:string})=>Promise<string>;
 };
 export type Data={vault:Live<VaultState>;history:Live<History>;refresh:()=>void};
-type Route='home'|'vault'|'position';
+type Route='vault'|'position';
 
 function useRoute():Route{
   const [path,setPath]=useState(location.pathname);
   useEffect(()=>{const on=()=>setPath(location.pathname);addEventListener('popstate',on);return()=>removeEventListener('popstate',on);},[]);
-  if(path.startsWith('/vault')||path.startsWith('/app'))return 'vault';
-  if(path.startsWith('/position'))return 'position';
-  return 'home';
+  // The vault page is the home page; /vault and the old /app keep working as aliases.
+  return path.startsWith('/position')?'position':'vault';
 }
 
 export default function App(){
@@ -38,7 +36,7 @@ export default function App(){
   const data:Data={vault,history,refresh:()=>{refreshVault();refreshHistory();}};
 
   useEffect(()=>{setupWalletSelector({network:'testnet',modules:[setupMyNearWallet()]}).then(async s=>{setSelector(s);const w=await s.wallet('my-near-wallet');setAccount((await w.getAccounts())[0]?.accountId||'');}).catch(e=>setWalletError(`Wallet unavailable: ${(e as Error).message}`));},[]);
-  useEffect(()=>{document.title=route==='vault'?'Kuroko · USDC vault':route==='position'?'Kuroko · Your position':'Kuroko · Earn from filling other people’s swaps';},[route]);
+  useEffect(()=>{document.title=route==='position'?'Your position · Kuroko':'Kuroko USDC vault';},[route]);
 
   const connect=useCallback(async()=>{
     setWalletError('');
@@ -62,35 +60,30 @@ export default function App(){
   const go=(path:string)=>(e:React.MouseEvent)=>{e.preventDefault();navigate(path);};
   const link=(path:string,label:string,r:Route)=><a href={path} onClick={go(path)} aria-current={route===r?'page':undefined}>{label}</a>;
 
-  return <div className={`shell route-${route}`}>
-    <header className={`topbar${route==='home'?' on-dark':''}`}>
+  return <div className="shell">
+    <header className="topbar">
       <div className="topbar-in">
-        <a className="brand" href="/" onClick={go('/')} aria-label="Kuroko home"><Mark/><span>Kuroko</span></a>
-        <nav className="topnav" aria-label="Pages">{link('/vault','Vault','vault')}{link('/position','Your position','position')}</nav>
+        <a className="brand" href="/" onClick={go('/')} aria-label="Kuroko, vault page"><Mark/><span>Kuroko</span></a>
+        <nav className="topnav" aria-label="Pages">{link('/','Vault','vault')}{link('/position','Position','position')}</nav>
         <div className="topbar-end">
-          <span className="net"><i/>Testnet</span>
+          <span className="net">Testnet</span>
           {account
-            ?<button className="btn btn-quiet btn-sm acct" onClick={()=>void disconnect()} title="Disconnect wallet"><Icon name="wallet" size={16}/>{short(account,12,6)}</button>
-            :<button className="btn btn-primary btn-sm" onClick={()=>void connect()} disabled={!selector}><Icon name="wallet" size={16}/><span className="hide-sm">Connect wallet</span><span className="show-sm">Connect</span></button>}
+            ?<button className="btn btn-line btn-sm acct" onClick={()=>void disconnect()} title="Disconnect wallet"><span className="mono">{short(account,10,6)}</span></button>
+            :<button className="btn btn-ink btn-sm" onClick={()=>void connect()} disabled={!selector}><span>Connect<span className="hide-sm"> wallet</span></span></button>}
         </div>
       </div>
-      <span className="curtain-rule" aria-hidden="true"><i/><i/><i/></span>
     </header>
-    <nav className="tabbar" aria-label="Pages (mobile)">{link('/','Home','home')}{link('/vault','Vault','vault')}{link('/position','Position','position')}</nav>
-    {walletError&&<p className="banner-error" role="alert"><Icon name="x" size={16}/>{walletError}</p>}
+    {walletError&&<p className="err banner" role="alert">{walletError}</p>}
     <main>
-      {route==='home'&&<Landing data={data}/>}
       {route==='vault'&&<VaultPage data={data} wallet={wallet}/>}
       {route==='position'&&<Position data={data} wallet={wallet}/>}
     </main>
     <footer className="foot">
       <div className="foot-in">
-        <div className="foot-brand"><Mark size={26}/><p><b>Kuroko</b> · a shared USDC vault that would earn by filling NEAR Intents swaps. Testnet prototype: deposits are live, swap filling is not.</p></div>
-        <div className="foot-links">
-          <a href={nearblocksAccount(vaultId)} target="_blank" rel="noreferrer">Vault contract <Icon name="external" size={14}/></a>
-          <a href="https://docs.near-intents.org/integration/market-makers/introduction" target="_blank" rel="noreferrer">NEAR Intents market makers <Icon name="external" size={14}/></a>
-          <span>MIT · © 2026 Nivesh Gajengi</span>
-        </div>
+        <span>Kuroko · NEAR testnet prototype</span>
+        <a href={nearblocksAccount(vaultId)} target="_blank" rel="noreferrer">Vault contract</a>
+        <a href="https://docs.near-intents.org/integration/market-makers/introduction" target="_blank" rel="noreferrer">NEAR Intents market makers</a>
+        <span>MIT · © 2026 Nivesh Gajengi</span>
       </div>
     </footer>
   </div>;

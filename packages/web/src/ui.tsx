@@ -1,105 +1,76 @@
 import {useEffect,useRef,useState,type ReactNode} from 'react';
-import artFiles from 'virtual:art';
 import type {Point} from './activity';
 
-type IconName='arrow'|'external'|'refresh'|'wallet'|'check'|'x'|'lock'|'scale'|'pulse'|'shield'|'layers'|'flag'|'copy'|'vote'|'plus'|'minus'|'swap'|'coins'|'user'|'clock';
+type IconName='external'|'copy'|'check'|'x'|'chevron'|'wallet';
 const paths:Record<IconName,string>={
-  arrow:'M5 12h14m-5-5 5 5-5 5',
   external:'M14 5h5v5m0-5-8 8M17 14v5H5V7h5',
-  refresh:'M20 11a8 8 0 0 0-14.3-4.9L4 8m0-4v4h4m-4 5a8 8 0 0 0 14.3 4.9L20 16m0 4v-4h-4',
-  wallet:'M4 7.5A1.5 1.5 0 0 1 5.5 6H18v3M4 7.5v10A1.5 1.5 0 0 0 5.5 19H20V9H5.5A1.5 1.5 0 0 1 4 7.5ZM16 14h.01',
+  copy:'M9 9h10v10H9zM5 15V5h10',
   check:'m5 12.5 4.5 4.5L19 7.5',
   x:'M6 6l12 12M18 6 6 18',
-  lock:'M7 11V8a5 5 0 0 1 10 0v3M5.5 11h13v9h-13zM12 15v2',
-  scale:'M12 4v16M5 20h14M6 8h12M6 8l-3 6h6L6 8Zm12 0-3 6h6l-3-6Z',
-  pulse:'M3 12h4l2-6 4 12 2-6h6',
-  shield:'M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6L12 3Z',
-  layers:'M12 3 3 8l9 5 9-5-9-5Zm-9 9 9 5 9-5M3 16l9 5 9-5',
-  flag:'M5 21V4m0 0h11l-2 4 2 4H5',
-  copy:'M9 9h10v10H9zM5 15V5h10',
-  vote:'M4 13h16v7H4zM8 13V5h8v8M10 9l1.5 1.5L14 8',
-  plus:'M12 5v14M5 12h14',
-  minus:'M5 12h14',
-  swap:'M7 7h12l-3-3M17 17H5l3 3',
-  coins:'M12 4c4.4 0 8 1.3 8 3s-3.6 3-8 3-8-1.3-8-3 3.6-3 8-3Zm-8 3v5c0 1.7 3.6 3 8 3s8-1.3 8-3V7M4 12v5c0 1.7 3.6 3 8 3s8-1.3 8-3v-5',
-  user:'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0',
-  clock:'M12 7v5l3 2m6-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
+  chevron:'m9 6 6 6-6 6',
+  wallet:'M4 7.5A1.5 1.5 0 0 1 5.5 6H18v3M4 7.5v10A1.5 1.5 0 0 0 5.5 19H20V9H5.5A1.5 1.5 0 0 1 4 7.5ZM16 14h.01',
 };
-export function Icon({name,size=18}:{name:IconName;size?:number}){
+export function Icon({name,size=16}:{name:IconName;size?:number}){
   return <svg className="icon" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[name]}/></svg>;
 }
 
-export type Tone='live'|'warn'|'bad'|'idle'|'kaki';
-export function Chip({tone='idle',children}:{tone?:Tone;children:ReactNode}){return <span className={`chip chip-${tone}`}><i/>{children}</span>;}
-
-/** The mark: the three stripes of the kabuki curtain (black, persimmon, green). */
-export function Mark({size=30}:{size?:number}){
-  return <svg className="mark" width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
-    <rect width="32" height="32" rx="9" fill="#1b1310"/>
-    <rect x="7" y="7" width="5" height="18" rx="1.5" fill="#fcf0e8"/>
-    <rect x="13.5" y="7" width="5" height="18" rx="1.5" fill="#f06a2a"/>
-    <rect x="20" y="7" width="5" height="18" rx="1.5" fill="#88a83a"/>
+/** The mark: a black square with a white K. */
+export function Mark({size=28}:{size?:number}){
+  return <svg className="mark" width={size} height={size} viewBox="0 0 28 28" aria-hidden="true">
+    <rect width="28" height="28" rx="7" fill="#151514"/>
+    <path d="M9.5 7.5v13M9.5 15l8-7.5M12.6 12.2l5.4 8.3" stroke="#fafaf8" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
   </svg>;
 }
 
-const reduced=()=>typeof matchMedia!=='undefined'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-/** Counts up to a number once it is known (static under reduced motion). */
-export function CountUp({value,decimals=2,prefix='',suffix=''}:{value:number|null;decimals?:number;prefix?:string;suffix?:string}){
-  const [shown,setShown]=useState(value??0);
-  const from=useRef(0);
-  useEffect(()=>{
-    if(value===null)return;
-    if(reduced()){setShown(value);from.current=value;return;}
-    const start=performance.now();const a=from.current;const d=900;let raf=0;
-    const tick=(t:number)=>{const k=Math.min(1,(t-start)/d);const e=1-Math.pow(1-k,3);setShown(a+(value-a)*e);if(k<1)raf=requestAnimationFrame(tick);else from.current=value;};
-    raf=requestAnimationFrame(tick);return()=>cancelAnimationFrame(raf);
-  },[value]);
-  if(value===null)return <span className="num num-empty" aria-label="Loading">—</span>;
-  const text=shown.toLocaleString('en-US',{minimumFractionDigits:decimals,maximumFractionDigits:decimals});
-  return <span className="num" aria-label={`${prefix}${value.toLocaleString('en-US',{minimumFractionDigits:decimals,maximumFractionDigits:decimals})}${suffix}`}><span aria-hidden="true">{prefix}{text}{suffix&&<em>{suffix}</em>}</span></span>;
+/** One big number with a lighter unit and a small label above it, no box. */
+export function Stat({label,value,unit,note}:{label:string;value:ReactNode;unit?:string;note?:ReactNode}){
+  return <div className="stat">
+    <span className="stat-label">{label}</span>
+    <span className="stat-value">{value}{unit&&<span className="stat-unit"> {unit}</span>}</span>
+    {note&&<span className="stat-note">{note}</span>}
+  </div>;
 }
 
-/** Step chart of the vault's USDC from its first deposit to now, drawn from replayed chain events. */
+/** Step chart of the vault's USDC (or share price) from its first deposit to now, drawn from replayed chain events. */
 export function ValueChart({points,metric}:{points:Point[];metric:'cash'|'price'}){
-  const W=720,H=240,P={l:8,r:8,t:16,b:28};
-  if(!points.length)return <div className="chart-empty"><Icon name="pulse"/>No deposits yet, so there is nothing to chart.</div>;
+  // Drawn at the container's real width so tick labels stay legible on phones.
+  const ref=useRef<HTMLElement>(null);
+  const [W,setW]=useState(760);
+  useEffect(()=>{const el=ref.current;if(!el)return;const ro=new ResizeObserver(([e])=>setW(Math.max(260,Math.round(e.contentRect.width))));ro.observe(el);return()=>ro.disconnect();},[]);
+  const H=W<520?200:260,P={l:0,r:W<520?44:56,t:12,b:12};
+  if(!points.length)return <p className="chart-empty">No deposits yet, so there is nothing to chart.</p>;
   const now=Date.now();
-  const first=points[0].at,t1=Math.max(now,points[points.length-1].at+1);const t0=first-Math.max(60_000,(t1-first)*0.06);
+  const first=points[0].at,t1=Math.max(now,points[points.length-1].at+1);const t0=first-Math.max(60_000,(t1-first)*0.04);
   const val=(p:Point)=>Number(metric==='cash'?p.cash:p.price)/1e6;
-  const vals=points.map(val);const max=Math.max(...vals,metric==='price'?1.02:0.000001)*(metric==='cash'?1.18:1);const min=metric==='price'?Math.min(...vals,0.98):0;
+  const vals=points.map(val);
+  const top=metric==='cash'?niceCeil(Math.max(...vals)*1.15):Math.max(1.02,...vals.map(v=>v*1.01));
+  const bottom=metric==='cash'?0:Math.min(0.98,...vals.map(v=>v*0.99));
   const x=(t:number)=>P.l+(t-t0)/(t1-t0)*(W-P.l-P.r);
-  const y=(v:number)=>P.t+(1-(v-min)/(max-min||1))*(H-P.t-P.b);
-  let d=`M${x(t0)},${y(metric==='cash'?0:vals[0])}`;void first;
-  points.forEach((p,i)=>{d+=` L${x(p.at)},${y(i===0&&metric==='cash'?0:vals[i-1]??vals[0])} L${x(p.at)},${y(vals[i])}`;});
+  const y=(v:number)=>P.t+(1-(v-bottom)/(top-bottom||1))*(H-P.t-P.b);
+  const startV=metric==='cash'?0:vals[0];
+  let d=`M${x(t0)},${y(startV)}`;
+  points.forEach((p,i)=>{d+=` L${x(p.at)},${y(i===0?startV:vals[i-1])} L${x(p.at)},${y(vals[i])}`;});
   d+=` L${x(t1)},${y(vals[vals.length-1])}`;
   const area=`${d} L${x(t1)},${H-P.b} L${x(t0)},${H-P.b} Z`;
-  const fmt=(t:number)=>new Date(t).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-  return <figure className="chart">
-    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label={`${metric==='cash'?'Vault USDC':'Share price'} over time, latest ${vals[vals.length-1].toFixed(6)}`}>
-      <defs><linearGradient id="kfill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#f06a2a" stopOpacity=".28"/><stop offset="1" stopColor="#f06a2a" stopOpacity="0"/></linearGradient></defs>
-      {[0.25,0.5,0.75].map(f=><line key={f} x1={P.l} x2={W-P.r} y1={P.t+f*(H-P.t-P.b)} y2={P.t+f*(H-P.t-P.b)} className="grid"/>)}
-      <path d={area} fill="url(#kfill)"/>
-      <path d={d} className="line" fill="none" vectorEffect="non-scaling-stroke"/>
-      {points.map((p,i)=><circle key={i} cx={x(p.at)} cy={y(vals[i])} r="4" className="dot" vectorEffect="non-scaling-stroke"/>)}
+  const ticks=[0,0.5,1].map(f=>bottom+(top-bottom)*f);
+  const dp=metric==='cash'?2:4;
+  const day=(t:number)=>new Date(t).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+  const latest=vals[vals.length-1];
+  return <figure className="chart" ref={ref}>
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${metric==='cash'?'Vault USDC':'Share price'} over time, now ${latest.toFixed(dp)}`}>
+      {ticks.map(v=><g key={v}><line x1={P.l} x2={W-P.r} y1={y(v)} y2={y(v)} className="grid"/><text x={W-P.r+8} y={y(v)+4} className="tick">{v.toFixed(dp)}</text></g>)}
+      {metric==='cash'&&<path d={area} className="area"/>}
+      <path d={d} className="line" fill="none"/>
+      <circle cx={x(t1)} cy={y(latest)} r="4" className="dot"/>
     </svg>
-    <figcaption><span>{fmt(first)}</span><span>now</span></figcaption>
+    <figcaption style={{marginRight:P.r}}><span>{day(t0)}</span><span>Now</span></figcaption>
   </figure>;
 }
-
-/** Framed art, or a designed gradient placeholder until the file exists. */
-export function Art({name,className=''}:{name:string;className?:string}){
-  const has=artFiles.includes(`${name}.webp`);
-  return <div className={`art ${has?'art-real':'art-ph'} ${className}`} aria-hidden="true">{has&&<img src={`/art/${name}.webp`} alt=""/>}</div>;
-}
-
-export function Empty({icon='pulse',title,children,action}:{icon?:IconName;title:string;children?:ReactNode;action?:ReactNode}){
-  return <div className="empty"><span className="empty-icon"><Icon name={icon} size={20}/></span><strong>{title}</strong>{children&&<p>{children}</p>}{action}</div>;
-}
+function niceCeil(v:number){if(v<=0)return 1;const e=Math.pow(10,Math.floor(Math.log10(v)));const m=v/e;return ([1,1.2,1.5,2,2.5,3,4,5,6,8,10].find(k=>m<=k)??10)*e;}
 
 export function Copy({value}:{value:string}){
   const [done,setDone]=useState(false);
-  return <button type="button" className="copy" aria-label={`Copy ${value}`} title="Copy" onClick={()=>navigator.clipboard?.writeText(value).then(()=>{setDone(true);setTimeout(()=>setDone(false),1400)})}><Icon name={done?'check':'copy'} size={15}/></button>;
+  return <button type="button" className="copy" aria-label={`Copy ${value}`} title="Copy" onClick={()=>navigator.clipboard?.writeText(value).then(()=>{setDone(true);setTimeout(()=>setDone(false),1400)})}><Icon name={done?'check':'copy'} size={14}/></button>;
 }
 
 export type Live<T>={state:'loading'}|{state:'ok';value:T;at:number}|{state:'error';message:string;value?:T};

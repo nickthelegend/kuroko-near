@@ -45,6 +45,10 @@ export function rawUnits(value:string,places=6){if(!/^(0|[1-9]\d*)(\.\d+)?$/.tes
 export const nearblocksTx=(hash:string)=>`https://testnet.nearblocks.io/txns/${hash}`;
 export const nearblocksAccount=(id:string)=>`https://testnet.nearblocks.io/address/${id}`;
 export function ago(ms:number,now=Date.now()){const s=Math.max(0,Math.round((now-ms)/1000));if(s<60)return `${s}s ago`;const m=Math.round(s/60);if(m<60)return `${m} min ago`;const h=Math.round(m/60);if(h<48)return `${h} h ago`;return `${Math.round(h/24)} d ago`;}
+/** USDC from raw 6-decimal units at fintech precision: 2 places, or up to 6 significant places below one cent. */
+export function usdc(raw:string|bigint,places=2){try{const n=BigInt(raw);const a=n<0n?-n:n;if(a>0n&&a<10_000n)return decimal(n,6).replace(/^(-?\d+\.\d*?[1-9]\d?).*$/,'$1');return decimal(n,6,places);}catch{return '—';}}
+/** "Nov 10, 9:14 AM" (adds the year when it is not this year). */
+export function when(ms:number){const d=new Date(ms);const sameYear=d.getFullYear()===new Date().getFullYear();return d.toLocaleString('en-US',{month:'short',day:'numeric',...(sameYear?{}:{year:'numeric'}),hour:'numeric',minute:'2-digit'});}
 export const short=(value:string,head=10,tail=6)=>value.length>head+tail+1?`${value.slice(0,head)}…${value.slice(-tail)}`:value;
 /** Share price in USDC, 6 places, or the 1.000000 genesis price when nothing is deposited. */
 export function sharePrice(cash:string|bigint,shares:string|bigint){const s=BigInt(shares);if(s===0n)return 1_000_000n;return BigInt(cash)*1_000_000n/s;}
