@@ -33,3 +33,16 @@ pnpm test
 - History is read from FastNEAR's testnet transaction index (`tx.test.fastnear.com`) and the NEP-141 events inside each transaction (NearBlocks' public API rate-limited this session); links still point to NearBlocks.
 
 Earlier browser checks (2026-11-09 and the first 2026-11-10 pass) covered the old landing, `/app` terminal and art-led vault page, all since replaced.
+
+## Wallet: Meteor Wallet replaces MyNearWallet (2026-11-10)
+
+MyNearWallet's testnet pop-up now refuses every app ("MyNearWallet can't connect to apps anymore … no longer accepts new app connections"), so the old **Connect** dead-ended. The web app now uses `@near-wallet-selector/core` 10.1.4 with `@near-wallet-selector/meteor-wallet` 10.1.4; MyNearWallet is removed. `pnpm-workspace.yaml` gives the wallet packages their own near-api-js 6.2.5 (Meteor's SDK peer) and `@near-js/utils` 2.5.1 (the `@near-js` 2.x peer); `packages/web` keeps near-api-js 5.0.0.
+
+Checked against `vite build && vite preview` in headless Chrome at 1440×900 and 375×812:
+
+- `/` → **Connect** opens a pop-up at `https://wallet.meteorwallet.app/connect/testnet/login?…`. The request the app posts into it reads `actionType: login`, `network: testnet`, `contract_id: kuroko-v-83692eef.testnet`, `type: ALL_METHODS` with a fresh public key.
+- Closing the pop-up shows "The wallet closed before you signed in." under the header. With pop-ups blocked (`window.open` returning null) it shows "Your browser blocked the wallet window. Allow pop-ups for this site, then try again."
+- 0 console errors, no horizontal overflow at 375.
+
+Not done: a full Meteor sign-in, a browser deposit and its approval. Meteor's site sits behind Cloudflare, which shows headless Chrome "Sorry, you have been blocked", and signing in needs a person with a Meteor testnet account (see BLOCKED.md).
+
