@@ -17,19 +17,19 @@ pnpm test
 | Web | TypeScript pass | 0 | 0 | `tsc --noEmit`; production `pnpm --filter @kuroko/web build` also passed |
 | **Total executable tests** | **13** | **0** | **0** | Two sandbox suites run on real local nearcore |
 
-`pnpm test` completed with exit code 0 without an environment override. The sandbox binary was loaded from this repository’s gitignored `.tools/` directory. The test suite does not claim relay signing, a mainnet fill, Sputnik DAO, Pyth, or 1Click execution. Those require the conditions in [BLOCKED.md](BLOCKED.md). Browser check (2026-11-10, after the web redesign; production build via `vite preview` on port 5371, headless Chrome through playwright-core, no env: the web reads the recorded live vault `kuroko-v-83692eef.testnet`):
+`pnpm test` completed with exit code 0 without an environment override. The sandbox binary was loaded from this repository’s gitignored `.tools/` directory. The test suite does not claim relay signing, a mainnet fill, Sputnik DAO, Pyth, or 1Click execution. Those require the conditions in [BLOCKED.md](BLOCKED.md). Browser check (2026-11-10, second redesign: the vault page is the home page, Morpho-style; production build via `vite preview` on port 5374, headless Chrome through playwright-core, no env: the web reads the recorded live vault `kuroko-v-83692eef.testnet`):
 
 | Route | 1440×900 | 375×812 | Page or console errors | Horizontal overflow |
 | --- | --- | --- | --- | --- |
-| `/` landing | renders | renders | 0 | 0 px |
-| `/vault` | renders | renders | 0 | 0 px |
+| `/` vault (home) | renders | renders | 0 | 0 px |
+| `/app` and `/vault` (aliases of `/`) | renders | renders | 0 | 0 px |
 | `/position` (no wallet) | renders | renders | 0 | 0 px |
 | `/position?account=kuroko-lp-346fc6f5.testnet` | renders | renders | 0 | 0 px |
 
-- Live data on screen matched RPC: vault 0.30 USDC and 0.30 shares; the replayed history shows the 0.50 USDC deposit and 0.20 USDC withdrawal with their NearBlocks links; the read-only position shows 0.3000 USDC, 100.00% of the vault, net deposited 0.3000 USDC, earned 0.0000.
-- The `/vault` "Would the rules allow this trade?" form called `check_trade` on testnet: USDC ↔ wNEAR, 0.5 USDC, 0.30% returned **Allowed**; by RPC the unlisted USDC ↔ ETH pair and a 10 bps fee both return `false`.
-- With `prefers-reduced-motion: reduce` animations compute to `none` and the count-ups render their final value. Keyboard Tab shows a 2 px persimmon focus outline. Tap targets are 44 px or taller.
-- The page makes no request to `127.0.0.1:3100` unless built with `VITE_SOLVER_API`, so the old `ERR_CONNECTION_REFUSED` console message is gone; Recent fills shows **Setup required: PARTNER_JWT**.
-- NearBlocks' public API was rate-limited (HTTP 429) during this session, so history is read from FastNEAR's testnet transaction index (`tx.test.fastnear.com`) and the NEP-141 events inside each transaction; links still point to NearBlocks.
+- Live data on screen matched RPC: total deposits 0.30 USDC, share price 1.0000 USDC; the activity table shows the 0.50 USDC deposit and the 0.20 USDC withdrawal with dates and NearBlocks links; the read-only position shows 0.30 USDC, 0.3000 shares, 100% of the vault, net deposited 0.30 USDC, earned 0.00.
+- The "Check a trade against the rules" form called `check_trade` on testnet: USDC ↔ wNEAR, 0.50 USDC at 0.30% returned **Allowed**; USDC ↔ ETH returned **Refused**.
+- With `prefers-reduced-motion: reduce` the fade-ins and skeleton pulse are off. Keyboard Tab shows a 2 px green focus outline. Buttons, tabs, the chart toggle and form fields are 44 px or taller.
+- The page makes no request to `127.0.0.1:3100` unless built with `VITE_SOLVER_API`; the activity section shows one line: Swap fills: none yet (Setup required: PARTNER_JWT).
+- History is read from FastNEAR's testnet transaction index (`tx.test.fastnear.com`) and the NEP-141 events inside each transaction (NearBlocks' public API rate-limited this session); links still point to NearBlocks.
 
-Previous browser check (2026-11-09) covered the old landing and `/app` terminal against the first, empty `usdc.testnet` deployment.
+Earlier browser checks (2026-11-09 and the first 2026-11-10 pass) covered the old landing, `/app` terminal and art-led vault page, all since replaced.
