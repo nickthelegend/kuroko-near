@@ -1,6 +1,6 @@
 import {useCallback,useEffect,useState} from 'react';
-import {actionCreators,setupWalletSelector,type InjectedWallet,type WalletSelector} from '@near-wallet-selector/core';
-import {setupMeteorWallet} from '@near-wallet-selector/meteor-wallet';
+import {actionCreators} from '@near-wallet-selector/core';
+import {setupWalletLayer,type WalletLayer} from './wallet-layer';
 import VaultPage from './Vault';
 import Position from './Position';
 import {confirmedHash} from './transactions';
@@ -12,7 +12,6 @@ const gas=100_000_000_000_000n;
 /** Meteor Wallet (testnet) opens in a pop-up (or its browser extension) and posts the result back, so there is no
  * redirect route. MyNearWallet was dropped on 2026-11-10: its testnet pop-up now answers "MyNearWallet can't connect
  * to apps anymore" and sends people to Meteor. */
-const walletId='meteor-wallet';
 
 /** Plain words for the wallet window's own failures; anything else (a contract panic, an RPC error) passes through. */
 function plainWalletError(e:unknown,signingIn=false):Error{
@@ -41,7 +40,7 @@ function useRoute():Route{
 
 export default function App(){
   const route=useRoute();
-  const [selector,setSelector]=useState<WalletSelector|null>(null);
+  const [selector,setSelector]=useState<WalletLayer|null>(null);
   const [account,setAccount]=useState('');
   const [busy,setBusy]=useState(false);
   const [walletError,setWalletError]=useState('');
@@ -49,21 +48,21 @@ export default function App(){
   const [history,refreshHistory]=useLive(()=>loadHistory(),30000);
   const data:Data={vault,history,refresh:()=>{refreshVault();refreshHistory();}};
 
-  useEffect(()=>{setupWalletSelector({network:'testnet',modules:[setupMeteorWallet()]}).then(async s=>{setSelector(s);const w=await s.wallet<InjectedWallet>(walletId);setAccount(s.isSignedIn()?(await w.getAccounts())[0]?.accountId||'':'');}).catch(e=>setWalletError(`Wallet unavailable: ${(e as Error).message}`));},[]);
+  useEffect(()=>{setupWalletLayer().then(async s=>{setSelector(s);const w=await s.wallet();setAccount(s.isSignedIn()?(await w.getAccounts())[0]?.accountId||'':'');}).catch(e=>setWalletError(`Wallet unavailable: ${(e as Error).message}`));},[]);
   useEffect(()=>{document.title=route==='position'?'Your position · Kuroko':'Kuroko USDC vault';},[route]);
 
   const connect=useCallback(async()=>{
     setWalletError('');
-    try{if(!selector)throw new Error('Wallet is still loading');const w=await selector.wallet<InjectedWallet>(walletId);setAccount((await w.signIn({contractId:vaultId,methodNames:[]}))[0]?.accountId||'');}
+    try{if(!selector)throw new Error('Wallet is still loading');const w=await selector.wallet();setAccount((await w.signIn({contractId:vaultId,methodNames:[]}))[0]?.accountId||'');}
     catch(e){setWalletError(plainWalletError(e,true).message);}
   },[selector]);
-  const disconnect=useCallback(async()=>{if(!selector)return;const w=await selector.wallet(walletId);await w.signOut();setAccount('');},[selector]);
+  const disconnect=useCallback(async()=>{if(!selector)return;const w=await selector.wallet();await w.signOut();setAccount('');},[selector]);
   const call=useCallback(async(method:string,args:object,opts:{deposit?:string;receiver?:string}={})=>{
     const receiver=opts.receiver??vaultId;
     if(!selector||!account)throw new Error('Connect a NEAR testnet wallet first');
     setBusy(true);
     try{
-      const wallet=await selector.wallet(walletId);
+      const wallet=await selector.wallet();
       let result;
       try{result=await wallet.signAndSendTransaction({receiverId:receiver,actions:[actionCreators.functionCall(method,args,gas,BigInt(opts.deposit??'0'))]});}
       catch(e){throw plainWalletError(e);}
