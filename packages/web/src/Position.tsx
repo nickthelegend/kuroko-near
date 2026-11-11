@@ -20,7 +20,8 @@ export default function Position({data,wallet}:{data:Data;wallet:Wallet}){
   const s=valueOf(shares);
   const price=v?sharePrice(v.usdc_balance,v.total_shares):null;
   const value=s!=null&&price!=null?BigInt(s)*price/1_000_000n:null;
-  const net=h&&account?netDeposited(h,account):null;
+  const reconciled=h&&v&&h.cash===BigInt(v.usdc_balance)&&h.shares===BigInt(v.total_shares);
+  const net=h&&account&&reconciled?netDeposited(h,account):null;
   const earned=value!=null&&net!=null?value-net:null;
   const pct=s!=null&&v&&BigInt(v.total_shares)>0n?Number(BigInt(s)*10000n/BigInt(v.total_shares))/100:null;
   const mine=h&&account?h.events.filter(e=>e.account===account).reverse():[];

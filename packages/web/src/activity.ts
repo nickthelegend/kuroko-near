@@ -1,4 +1,5 @@
 import {usdcId,vaultId} from './rpc';
+import {uniqueReceipts,type FullTx} from './history-receipts';
 
 /**
  * Vault history rebuilt from the chain: FastNEAR's public testnet transaction index lists every transaction that
@@ -10,9 +11,6 @@ const INDEX='https://tx.test.fastnear.com/v0';
 export type VaultEvent={hash:string;at:number;kind:'deposit'|'withdrawal'|'out';account:string;amount:bigint;shares:bigint};
 export type Point={at:number;cash:bigint;shares:bigint;price:bigint};
 export type History={events:VaultEvent[];points:Point[];cash:bigint;shares:bigint;depositors:Set<string>;txCount:number};
-
-type Receipt={receipt:{receiver_id:string;block_timestamp:number};execution_outcome:{outcome:{logs:string[];status:unknown}}};
-type FullTx={transaction:{hash:string;signer_id:string;receiver_id:string;actions:({FunctionCall?:{method_name:string;args:string}}|string)[]};receipts:Receipt[]};
 
 async function post<T>(path:string,body:object):Promise<T>{
   let r:Response;
@@ -41,8 +39,7 @@ export async function loadHistory(vault=vaultId,usdc=usdcId):Promise<History>{
     txs.push(...chunk.transactions.filter((t):t is FullTx=>!!t));
   }
   const events:VaultEvent[]=[];
-  for(const tx of txs){
-    for(const r of tx.receipts){
+  for(const {tx,receipt:r} of uniqueReceipts(txs)){
       if(r.receipt.receiver_id!==usdc)continue;
       for(const log of r.execution_outcome.outcome.logs){
         if(!log.startsWith('EVENT_JSON:'))continue;
@@ -58,7 +55,6 @@ export async function loadHistory(vault=vaultId,usdc=usdcId):Promise<History>{
           }
         }
       }
-    }
   }
   events.sort((a,b)=>a.at-b.at);
   // Replay the contract's share math: deposits mint at cash NAV, withdrawals burn the shares the caller named.
