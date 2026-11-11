@@ -81,7 +81,7 @@ export function useLive<T>(load:()=>Promise<T>,every=0,deps:unknown[]=[]):[Live<
   const [tick,setTick]=useState(0);
   useEffect(()=>{
     let on=true;
-    const run=()=>load().then(value=>on&&setLive({deps,result:{state:'ok',value,at:Date.now()}})).catch(e=>on&&setLive(prev=>({deps,result:{state:'error',message:(e as Error).message,value:same(prev.deps,deps)&&'value' in prev.result?prev.result.value:undefined}}))); 
+    const run=()=>load().then(value=>on&&setLive({deps,result:{state:'ok',value,at:Date.now()}})).catch(e=>on&&setLive(prev=>({deps,result:{state:'error',message:(e as Error).message,value:same(prev.deps,deps)&&'value' in prev.result?prev.result.value:undefined}})));
     run();
     const t=every?setInterval(run,every):undefined;
     return()=>{on=false;if(t)clearInterval(t);};
