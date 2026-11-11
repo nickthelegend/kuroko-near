@@ -3,6 +3,7 @@ import {actionCreators,setupWalletSelector,type InjectedWallet,type WalletSelect
 import {setupMeteorWallet} from '@near-wallet-selector/meteor-wallet';
 import VaultPage from './Vault';
 import Position from './Position';
+import {confirmedHash} from './transactions';
 import {loadHistory,type History} from './activity';
 import {loadVault,navigate,nearblocksAccount,short,vaultId,type VaultState} from './rpc';
 import {Mark,useLive,type Live} from './ui';
@@ -48,7 +49,7 @@ export default function App(){
   const [history,refreshHistory]=useLive(()=>loadHistory(),30000);
   const data:Data={vault,history,refresh:()=>{refreshVault();refreshHistory();}};
 
-  useEffect(()=>{setupWalletSelector({network:'testnet',modules:[setupMeteorWallet()]}).then(async s=>{setSelector(s);const w=await s.wallet(walletId);setAccount(await w.isSignedIn()?(await w.getAccounts())[0]?.accountId||'':'');}).catch(e=>setWalletError(`Wallet unavailable: ${(e as Error).message}`));},[]);
+  useEffect(()=>{setupWalletSelector({network:'testnet',modules:[setupMeteorWallet()]}).then(async s=>{setSelector(s);const w=await s.wallet<InjectedWallet>(walletId);setAccount(s.isSignedIn()?(await w.getAccounts())[0]?.accountId||'':'');}).catch(e=>setWalletError(`Wallet unavailable: ${(e as Error).message}`));},[]);
   useEffect(()=>{document.title=route==='position'?'Your position · Kuroko':'Kuroko USDC vault';},[route]);
 
   const connect=useCallback(async()=>{
@@ -66,9 +67,7 @@ export default function App(){
       let result;
       try{result=await wallet.signAndSendTransaction({receiverId:receiver,actions:[actionCreators.functionCall(method,args,gas,BigInt(opts.deposit??'0'))]});}
       catch(e){throw plainWalletError(e);}
-      if(!result)throw new Error('The wallet returned no transaction result');
-      if(typeof result.status==='object'&&result.status!==null&&'Failure' in result.status)throw new Error(`Transaction failed: ${JSON.stringify(result.status.Failure)}`);
-      return result.transaction?.hash||'';
+      return confirmedHash(result||undefined,method==='ft_transfer_call'?String((args as {amount:string}).amount):undefined);
     }finally{setBusy(false);}
   },[selector,account]);
   const wallet:Wallet={account,ready:!!selector,busy,connect,disconnect,call};
