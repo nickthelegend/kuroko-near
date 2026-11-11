@@ -26,3 +26,20 @@ Style line used in every prompt:
 
 Files: `packages/web/public/art/3d/kuroko-3d-<subject>.webp` (trimmed to the object, 640 px square, transparent,
 about 30 KB each). 3D art generated with ChatGPT.
+
+## Where each object is used
+
+| Object | File | Used in |
+|---|---|---|
+| Swap arrows | `kuroko-3d-swap.webp` | "How Kuroko earns", item 1 (market makers fill swaps), 72 px |
+| Coin stack | `kuroko-3d-coins.webp` | "How Kuroko earns", item 2 (fees kept for shareholders), 72 px |
+| Rules shield | `kuroko-3d-shield.webp` | "How Kuroko earns", item 3 (what is live today), 72 px |
+| Vault safe | `kuroko-3d-vault.webp` | Position page before a wallet connects, 96 px with a 4 px float |
+| Empty tray | `kuroko-3d-empty.webp` | Activity "No deposits yet", position "No deposits from this account" (56 px), and the swap-fills setup line (40 px) |
+| Ballot box | `kuroko-3d-ballot.webp` | Votes "No votes yet", 56 px |
+| Success seal | `kuroko-3d-success.webp` | Deposit and withdrawal confirmations in the panel, 40 px |
+| Caution plaque | `kuroko-3d-warning.webp` | Vault, history, votes, position and wallet errors, and the fills line when the solver fails, 36-44 px |
+
+Nothing goes in the header, the four numbers, the chart, the deposit form or the tables. Every image has a fixed
+width and height and alt text; the only motion is the position page's 4 px float, which stops under
+`prefers-reduced-motion`. The components are `Art` and `Note` in `packages/web/src/ui.tsx`.

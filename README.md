@@ -110,6 +110,8 @@ Built for NEAR HACKATHON 2026 (Nov 1-14).
 
 **AI-assisted code.** Built with AI coding agents (Claude Code, Codex) under human direction; all code reviewed and tested by the team.
 
+**Art.** 3D art generated with ChatGPT: eight matte ceramic and forest-green objects used in the explainer, empty states, error notes and confirmations. See [docs/ART-3D.md](docs/ART-3D.md).
+
 **Other projects by the same team in this hackathon**
 
 Lead: <TBD by Nick>
