@@ -63,7 +63,7 @@ main{flex:1}
 .side{grid-area:side;align-self:start;position:sticky;top:84px}
 .chart-block{grid-area:chart}
 .rest{grid-area:rest;min-width:0}
-.vault>.err{grid-column:1}
+.vault>.err,.vault>.note{grid-column:1}
 
 .vh-row{display:flex;align-items:center;gap:14px}
 .vh-icon{width:44px;height:44px;border-radius:50%;background:var(--ink);color:#fafaf8;display:grid;place-items:center;font-weight:700;font-size:21px;flex:none}
@@ -128,6 +128,7 @@ h3{font-size:16px}
 .facts dd{margin:0;font-weight:600}
 .panel .fine{margin-top:14px}
 .panel .ok,.panel .err{margin-top:12px}
+.panel .note{margin-top:12px;padding:0;gap:12px}
 
 /* Tables */
 .table{width:100%;border-collapse:collapse;font-size:14px}
@@ -179,7 +180,24 @@ h3{font-size:16px}
 /* How it earns */
 .how{border-top:1px solid var(--line);margin-top:48px;padding-top:24px}
 .how summary{display:flex;justify-content:space-between;width:100%}
-.how-body{display:grid;gap:12px;max-width:44em;color:var(--ink-2);padding:8px 0 4px;font-size:15px;line-height:1.6}
+.how-body{display:grid;gap:20px;max-width:46em;color:var(--ink-2);padding:12px 0 4px;font-size:15px;line-height:1.6}
+.how-item{display:grid;grid-template-columns:72px minmax(0,1fr);gap:24px;align-items:center}
+
+/* 3D objects (docs/ART-3D.md): one per message, no frames, no glow */
+.art3d{display:block;flex:none;object-fit:contain;user-select:none}
+.art3d-float{animation:float 6s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-4px)}}
+.note{display:flex;align-items:center;gap:16px;padding:8px 0}
+.note-text{min-width:0;font-size:14px;line-height:1.5}
+.note-plain .note-text{color:var(--ink-2);font-size:15px}
+.note-ok .note-text{color:var(--accent);font-weight:600}
+.note-err .note-text{color:var(--bad);font-weight:600}
+.note a{color:inherit}
+.fills-note{margin-top:16px}
+.fills-note .note{padding:0;gap:12px}
+.votes .note{padding:0}
+.phead>.art3d{margin-bottom:20px}
+.banner .note{padding:0;gap:12px}
 
 /* Messages and loading */
 .ok{color:var(--accent);font-size:14px;font-weight:600}
@@ -228,6 +246,8 @@ h3{font-size:16px}
   .net,.hide-sm{display:none}
   h1{font-size:32px}
   .vh-icon{width:36px;height:36px;font-size:17px}
+  .how-item{grid-template-columns:56px minmax(0,1fr);gap:16px;align-items:start}
+  .how-item .art3d{width:56px;height:56px}
   .vh-desc{font-size:16px;margin-top:12px}
   .vh-meta{column-gap:16px}
   .vh-meta .sep{display:none}

@@ -2,7 +2,7 @@ import {useEffect,useState} from 'react';
 import type {Data,Wallet} from './App';
 import {netDeposited} from './activity';
 import {decimal,exampleDepositor,navigate,nearblocksAccount,nearblocksTx,sharePrice,short,usdc,vaultId,view,when} from './rpc';
-import {Icon,Stat,useLive,valueOf} from './ui';
+import {Art,Icon,Note,Stat,useLive,valueOf} from './ui';
 
 const ACCOUNT_RE=/^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/;
 
@@ -30,7 +30,7 @@ export default function Position({data,wallet}:{data:Data;wallet:Wallet}){
   const look=(id:string)=>navigate(`/position?account=${encodeURIComponent(id)}`);
 
   if(!account)return <div className="wrap narrow">
-    <header className="phead"><h1>Your position</h1><p className="vh-desc">Connect a NEAR testnet wallet to see your shares and what they are worth.</p></header>
+    <header className="phead"><Art name="vault" size={96} float/><h1>Your position</h1><p className="vh-desc">Connect a NEAR testnet wallet to see your shares and what they are worth.</p></header>
     <button className="btn btn-ink" onClick={()=>void wallet.connect()} disabled={!wallet.ready}>Connect wallet</button>
     <form className="lookup" onSubmit={e=>{e.preventDefault();const id=lookup.trim().toLowerCase();if(!ACCOUNT_RE.test(id)||id.length<2||id.length>64){setLookupErr('Enter a NEAR account ID, like name.testnet');return;}setLookupErr('');look(id);}}>
       <label className="field"><span>Or look up any account, read-only</span>
@@ -47,8 +47,8 @@ export default function Position({data,wallet}:{data:Data;wallet:Wallet}){
       <p className="vh-meta"><a className="mono" href={nearblocksAccount(account)} target="_blank" rel="noreferrer">{short(account,18,8)}</a>
         {readOnly&&<><span className="sep" aria-hidden="true">·</span>Read-only<span className="sep" aria-hidden="true">·</span><a href="/position" onClick={e=>{e.preventDefault();navigate('/position');}}>Clear</a></>}</p>
     </header>
-    {data.vault.state==='error'&&<p className="err" role="alert">{data.vault.message}</p>}
-    {shares.state==='error'&&<p className="err" role="alert">{shares.message}</p>}
+    {data.vault.state==='error'&&<Note art="warning" tone="err" role="alert">{data.vault.message}</Note>}
+    {shares.state==='error'&&<Note art="warning" tone="err" role="alert">{shares.message}</Note>}
     <section className="stats" aria-label="Position numbers">
       <Stat label="Value" value={value!=null?usdc(value):'—'} unit="USDC"/>
       <Stat label="Shares" value={s!=null?decimal(s,6,4):'—'}/>
@@ -58,8 +58,8 @@ export default function Position({data,wallet}:{data:Data;wallet:Wallet}){
     <section className="block" aria-labelledby="pact-h">
       <div className="block-head"><h2 id="pact-h">Activity</h2>{net!=null&&<span className="muted">Net deposited {usdc(net)} USDC</span>}</div>
       {data.history.state==='error'&&h&&<p className="err" role="alert">History could not refresh: {data.history.message}</p>}
-      {!h?(data.history.state==='error'?<p className="err" role="alert">{data.history.message}</p>:<div className="sk sk-rows" aria-busy="true"><span/><span/></div>)
-        :mine.length===0?<p className="empty">No deposits from this account. <a href="/" onClick={e=>{e.preventDefault();navigate('/');}}>Deposit on the vault page</a>.</p>
+      {!h?(data.history.state==='error'?<Note art="warning" tone="err" role="alert">{data.history.message}</Note>:<div className="sk sk-rows" aria-busy="true"><span/><span/></div>)
+        :mine.length===0?<Note art="empty" size={56}>No deposits from this account. <a href="/" onClick={e=>{e.preventDefault();navigate('/');}}>Deposit on the vault page</a>.</Note>
         :<table className="table">
           <thead><tr><th>Date</th><th>Action</th><th className="r">Amount</th><th className="r">Shares</th><th className="r">Transaction</th></tr></thead>
           <tbody>{mine.map(e=><tr key={e.hash+e.kind}>

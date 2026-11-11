@@ -2,7 +2,7 @@ import {useEffect,useState} from 'react';
 import type {Data,Wallet} from './App';
 import type {History} from './activity';
 import {ago,decimal,nearblocksAccount,nearblocksTx,pairLabel,rawUnits,sharePrice,short,solverState,solverUrl,usdc,usdcId,vaultId,view,when,type Constitution,type Proposal,type SolverState} from './rpc';
-import {Copy,Icon,Stat,ValueChart,useLive,useNow,valueOf} from './ui';
+import {Art,Copy,Icon,Note,Stat,ValueChart,useLive,useNow,valueOf} from './ui';
 
 /** The vault page, which is also the home page: header, four numbers, chart, one deposit panel, then plain tables. */
 export default function VaultPage({data,wallet}:{data:Data;wallet:Wallet}){
@@ -43,7 +43,7 @@ export default function VaultPage({data,wallet}:{data:Data;wallet:Wallet}){
         note={!wallet.account?<button type="button" className="linkish" onClick={()=>void wallet.connect()} disabled={!wallet.ready}>Connect wallet</button>:undefined}/>
       <Stat label="APY" value="—" note="Needs fills to measure"/>
     </section>
-    {data.vault.state==='error'&&<p className="err" role="alert">{data.vault.message}</p>}
+    {data.vault.state==='error'&&<Note art="warning" tone="err" role="alert">{data.vault.message}</Note>}
 
     <aside className="side"><TradeCard data={data} wallet={wallet} locked={!!openVote} myShares={myShares??null} unavailable={unavailable}/></aside>
 
@@ -56,7 +56,7 @@ export default function VaultPage({data,wallet}:{data:Data;wallet:Wallet}){
         </div>
       </div>
       {data.history.state==='error'&&h&&<p className="err" role="alert">History could not refresh: {data.history.message}</p>}
-      {h?<ValueChart points={h.points} metric={metric}/>:data.history.state==='error'?<p className="err" role="alert">History unavailable: {data.history.message}</p>:<div className="sk sk-chart" aria-busy="true"/>}
+      {h?<ValueChart points={h.points} metric={metric}/>:data.history.state==='error'?<Note art="warning" tone="err" role="alert">History unavailable: {data.history.message}</Note>:<div className="sk sk-chart" aria-busy="true"/>}
       <p className="fine">Rebuilt from every USDC transfer in and out of the vault.{readAt&&` Contract read ${ago(readAt,now)}.`}</p>
       {mismatch&&<p className="fine">The transfer index shows {usdc(h.cash)} USDC; the contract shows {usdc(v.usdc_balance)} USDC. The index can lag a few blocks.</p>}
     </section>
@@ -73,9 +73,9 @@ export default function VaultPage({data,wallet}:{data:Data;wallet:Wallet}){
       <details className="how" id="how">
         <summary><h2>How Kuroko earns</h2><Icon name="chevron"/></summary>
         <div className="how-body">
-          <p>Every swap on NEAR Intents is filled by a market maker who quotes a price and keeps a small fee. Kuroko aims to pool depositors’ USDC to be that market maker, within rules they choose.</p>
-          <p>The aim is to retain fees in the vault for shareholders. Today there are no fees, and the rule checks do not restrict an off-chain Intents signer. Deposits and withdrawals are locked while a vote is open.</p>
-          <p>Today on testnet the vault, deposits, withdrawals, rules and votes are live. Filling swaps waits on NEAR Intents relay access, and there is no mainnet version. Kuroko has not filled a swap or earned a fee.</p>
+          <div className="how-item"><Art name="swap" size={72}/><p>Every swap on NEAR Intents is filled by a market maker who quotes a price and keeps a small fee. Kuroko aims to pool depositors’ USDC to be that market maker, within rules they choose.</p></div>
+          <div className="how-item"><Art name="coins" size={72}/><p>The aim is to retain fees in the vault for shareholders. Today there are no fees, and the rule checks do not restrict an off-chain Intents signer. Deposits and withdrawals are locked while a vote is open.</p></div>
+          <div className="how-item"><Art name="shield" size={72}/><p>Today on testnet the vault, deposits, withdrawals, rules and votes are live. Filling swaps waits on NEAR Intents relay access, and there is no mainnet version. Kuroko has not filled a swap or earned a fee.</p></div>
         </div>
       </details>
     </div>
@@ -128,7 +128,7 @@ function TradeCard({data,wallet,locked,myShares,unavailable}:{data:Data;wallet:W
       {!wallet.account
         ?<button type="button" className="btn btn-ink wide" onClick={()=>void wallet.connect()} disabled={!wallet.ready}>Connect wallet</button>
         :<button className="btn btn-ink wide" disabled={wallet.busy||locked||!amount||!!unavailable||(mode==='deposit'&&!!v?.paused)}>{unavailable??(locked?'Locked during a vote':mode==='deposit'&&v?.paused?'Vault paused':wallet.busy?'Confirm in your wallet…':mode==='deposit'?'Deposit':'Withdraw')}</button>}
-      {msg&&<p className={msg.ok?'ok':'err'} role={msg.ok?'status':'alert'}>{msg.text}{msg.hash&&<> · <a href={nearblocksTx(msg.hash)} target="_blank" rel="noreferrer">{short(msg.hash,6,4)}</a></>}</p>}
+      {msg&&<Note art={msg.ok?'success':'warning'} tone={msg.ok?'ok':'err'} role={msg.ok?'status':'alert'} size={40}>{msg.text}{msg.hash&&<> · <a href={nearblocksTx(msg.hash)} target="_blank" rel="noreferrer">{short(msg.hash,6,4)}</a></>}</Note>}
       <p className="fine">Circle testnet USDC on NEAR. <a href="https://faucet.circle.com/" target="_blank" rel="noreferrer">Get some from the faucet</a>.</p>
     </form>
   </section>;
@@ -137,7 +137,7 @@ function TradeCard({data,wallet,locked,myShares,unavailable}:{data:Data;wallet:W
 function ActivityTable({history,live}:{history?:History;live:Data['history']}){
   if(!history&&live.state==='loading')return <div className="sk sk-rows" aria-busy="true"><span/><span/></div>;
   if(!history)return <p className="err" role="alert">{live.state==='error'?live.message:''}</p>;
-  if(!history.events.length)return <p className="empty">No deposits yet. The first one will appear here with its transaction.</p>;
+  if(!history.events.length)return <Note art="empty" size={56}>No deposits yet. The first one will appear here with its transaction.</Note>;
   return <table className="table">
     <thead><tr><th>Date</th><th>Action</th><th>Account</th><th className="r">Amount</th><th className="r">Transaction</th></tr></thead>
     <tbody>{history.events.slice().reverse().map(e=><tr key={e.hash+e.kind}>
@@ -155,7 +155,7 @@ function Fills(){
   const [s,setS]=useState<{state:'off'}|{state:'ok';v:SolverState}|{state:'error';message:string}>({state:'off'});
   useEffect(()=>{if(!solverUrl)return;let on=true;const run=()=>solverState().then(v=>on&&setS({state:'ok',v})).catch(e=>on&&setS({state:'error',message:(e as Error).message}));run();const t=setInterval(run,5000);return()=>{on=false;clearInterval(t);};},[]);
   if(s.state==='ok')return <p className="fine">Swap fills: {s.v.won}. Listening only: {s.v.requestsSeen} requests seen, {s.v.wouldQuote} would have been quoted, none answered.</p>;
-  return <p className="fine">Swap fills: none yet. Filling needs NEAR Intents relay access (Setup required: PARTNER_JWT){s.state==='error'?`; solver: ${s.message}`:''}.</p>;
+  return <div className="fills-note"><Note art={s.state==='error'?'warning':'empty'} size={40}><span className="fine">Swap fills: none yet. Filling needs NEAR Intents relay access (Setup required: PARTNER_JWT){s.state==='error'?`; solver: ${s.message}`:''}.</span></Note></div>;
 }
 
 function Rules({data,wallet,proposals,locked,refresh,proposalError}:{data:Data;wallet:Wallet;proposals:Proposal[]|null;locked:boolean;refresh:()=>void;proposalError?:string}){
@@ -175,8 +175,8 @@ function Rules({data,wallet,proposals,locked,refresh,proposalError}:{data:Data;w
     <TradeCheck pairs={c?.allowed_pairs??[]} minSpread={c?.min_spread_bps}/>
     <div className="votes">
       <h3>Votes</h3>
-      {proposalError?<p className="err" role="alert">Votes unavailable: {proposalError}</p>:!proposals?<div className="sk sk-rows" aria-busy="true"><span/></div>:proposals.length===0
-        ?<p className="muted">No votes yet. A rule change needs a 24-hour vote with more than half of all shares.</p>
+      {proposalError?<Note art="warning" tone="err" role="alert">Votes unavailable: {proposalError}</Note>:!proposals?<div className="sk sk-rows" aria-busy="true"><span/></div>:proposals.length===0
+        ?<Note art="ballot" size={56}>No votes yet. A rule change needs a 24-hour vote with more than half of all shares.</Note>
         :<ul className="vote-list">{proposals.slice().reverse().map(p=>{
           const open=!p.executed&&Date.now()<p.closes_at_ms;const voted=p.voters.includes(wallet.account);
           const t=BigInt(p.snapshot_shares||'0');const pct=(x:string)=>t>0n?Number(BigInt(x)*10000n/t)/100:0;

@@ -22,6 +22,27 @@ export function Mark({size=28}:{size?:number}){
   </svg>;
 }
 
+export type ArtName='vault'|'swap'|'shield'|'ballot'|'coins'|'empty'|'success'|'warning';
+const artAlt:Record<ArtName,string>={
+  vault:'White ceramic vault safe with a green handle wheel',
+  swap:'Two curved swap arrows, one white and one green',
+  shield:'White ceramic shield with three green rule lines',
+  ballot:'White ceramic ballot box with a voting slip in the slot',
+  coins:'Stack of white and green ceramic coins',
+  empty:'Empty white ceramic tray with a green rim',
+  success:'White ceramic seal with a green check mark',
+  warning:'White ceramic caution sign with a black exclamation mark',
+};
+/** One object from the 3D kit (docs/ART-3D.md). Fixed size so nothing shifts while it loads. */
+export function Art({name,size=64,float=false}:{name:ArtName;size?:number;float?:boolean}){
+  return <img className={`art3d${float?' art3d-float':''}`} src={`/art/3d/kuroko-3d-${name}.webp`} width={size} height={size} alt={artAlt[name]} decoding="async"/>;
+}
+
+/** A quiet message with one object beside it: empty states, errors, setup notes and confirmations. */
+export function Note({art,tone='plain',role,size=44,children}:{art:ArtName;tone?:'plain'|'ok'|'err';role?:'status'|'alert';size?:number;children:ReactNode}){
+  return <div className={`note note-${tone}`} role={role}><Art name={art} size={size}/><div className="note-text">{children}</div></div>;
+}
+
 /** One big number with a lighter unit and a small label above it, no box. */
 export function Stat({label,value,unit,note}:{label:string;value:ReactNode;unit?:string;note?:ReactNode}){
   return <div className="stat">

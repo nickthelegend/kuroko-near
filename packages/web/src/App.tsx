@@ -6,7 +6,7 @@ import Position from './Position';
 import {confirmedHash} from './transactions';
 import {loadHistory,type History} from './activity';
 import {loadVault,navigate,nearblocksAccount,short,vaultId,type VaultState} from './rpc';
-import {Mark,useLive,type Live} from './ui';
+import {Mark,Note,useLive,type Live} from './ui';
 
 const gas=100_000_000_000_000n;
 /** Meteor Wallet (testnet) opens in a pop-up (or its browser extension) and posts the result back, so there is no
@@ -86,7 +86,7 @@ export default function App(){
         </div>
       </div>
     </header>
-    {walletError&&<p className="err banner" role="alert">{walletError}</p>}
+    {walletError&&<div className="banner"><Note art="warning" tone="err" role="alert" size={36}>{walletError}</Note></div>}
     <main>
       {route==='vault'&&<VaultPage data={data} wallet={wallet}/>}
       {route==='position'&&<Position data={data} wallet={wallet}/>}
