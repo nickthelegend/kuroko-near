@@ -22,7 +22,7 @@ export async function view<T>(account:string,method:string,args:object={}):Promi
   const post=()=>fetch(rpcUrl,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)});
   let response:Response;
   try{response=await post();}
-  catch{await new Promise(r=>setTimeout(r,900));try{response=await post();}catch(e){throw new Error(`NEAR testnet RPC unreachable at ${new URL(rpcUrl).host} (${(e as Error).message}). Retrying on the next refresh.`);}}
+  catch{await new Promise(r=>setTimeout(r,900));try{response=await post();}catch{throw new Error(`NEAR testnet RPC is unreachable at ${new URL(rpcUrl).host}. Retrying on the next refresh.`);}}
   if(!response.ok)throw new Error(`NEAR testnet RPC HTTP ${response.status}`);
   try{
     const json=await response.json();

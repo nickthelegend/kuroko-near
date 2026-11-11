@@ -17,8 +17,8 @@ type FullTx={transaction:{hash:string;signer_id:string;receiver_id:string;action
 async function post<T>(path:string,body:object):Promise<T>{
   let r:Response;
   try{r=await fetch(`${INDEX}/${path}`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)});}
-  catch(e){throw new Error(`Testnet transaction index unreachable (${(e as Error).message})`);}
-  if(!r.ok)throw new Error(`Testnet transaction index HTTP ${r.status}`);
+  catch{throw new Error('Testnet transaction history is unreachable. It will retry automatically.');}
+  if(!r.ok)throw new Error(`Testnet transaction history is unavailable (HTTP ${r.status}). It will retry automatically.`);
   try{return await r.json() as T;}catch{throw new Error('The testnet transaction index returned unreadable data. Please retry.');}
 }
 
