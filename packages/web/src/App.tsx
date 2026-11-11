@@ -48,7 +48,7 @@ export default function App(){
   const [history,refreshHistory]=useLive(()=>loadHistory(),30000);
   const data:Data={vault,history,refresh:()=>{refreshVault();refreshHistory();}};
 
-  useEffect(()=>{setupWalletSelector({network:'testnet',modules:[setupMeteorWallet()]}).then(async s=>{setSelector(s);const w=await s.wallet(walletId);setAccount((await w.getAccounts())[0]?.accountId||'');}).catch(e=>setWalletError(`Wallet unavailable: ${(e as Error).message}`));},[]);
+  useEffect(()=>{setupWalletSelector({network:'testnet',modules:[setupMeteorWallet()]}).then(async s=>{setSelector(s);const w=await s.wallet(walletId);setAccount(await w.isSignedIn()?(await w.getAccounts())[0]?.accountId||'':'');}).catch(e=>setWalletError(`Wallet unavailable: ${(e as Error).message}`));},[]);
   useEffect(()=>{document.title=route==='position'?'Your position · Kuroko':'Kuroko USDC vault';},[route]);
 
   const connect=useCallback(async()=>{
