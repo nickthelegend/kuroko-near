@@ -1,0 +1,39 @@
+diff --git a/dist/index.cjs b/dist/index.cjs
+index bb013b85e78f94ab5e6e590d0e7829f9f956629e..e623b4b935ab443ceaf96f4967513e4f105e45a5 100644
+--- a/dist/index.cjs	
++++ b/dist/index.cjs
+@@ -767,7 +767,7 @@ var MeteorWallet = class MeteorWallet {
+ 	async requestSignIn(options) {
+ 		const { keyPair,...restOptions } = options;
+ 		const accessKey = keyPair ?? __near_js_crypto.KeyPair.fromRandom("ed25519");
+-		console.log(accessKey);
++		// Do not log signing key material.
+ 		const usingPublicKey = accessKey.getPublicKey().toString();
+ 		const response = await getMeteorPostMessenger().connectAndWaitForResponse({
+ 			actionType: EExternalActionType.login,
+diff --git a/dist/index.js b/dist/index.js
+index c2ddb8bea64b5d82becd3b5beec88153a4f45c72..582de68890901a39591fcc655a3485ce4b01a002 100644
+--- a/dist/index.js	
++++ b/dist/index.js
+@@ -744,7 +744,7 @@ var MeteorWallet = class MeteorWallet {
+ 	async requestSignIn(options) {
+ 		const { keyPair,...restOptions } = options;
+ 		const accessKey = keyPair ?? KeyPair.fromRandom("ed25519");
+-		console.log(accessKey);
++		// Do not log signing key material.
+ 		const usingPublicKey = accessKey.getPublicKey().toString();
+ 		const response = await getMeteorPostMessenger().connectAndWaitForResponse({
+ 			actionType: EExternalActionType.login,
+diff --git a/src/MeteorWallet.ts b/src/MeteorWallet.ts
+index 049982c49f4e31015ffb35a9c1e080fd2a3718e4..64a279c7fe59371e338decb8aa98a824d6f96756 100644
+--- a/src/MeteorWallet.ts	
++++ b/src/MeteorWallet.ts
+@@ -260,7 +260,7 @@ export class MeteorWallet {
+ 
+     const accessKey: KeyPair = keyPair ?? KeyPair.fromRandom("ed25519");
+ 
+-    console.log(accessKey);
++    // Do not log signing key material.
+ 
+     const usingPublicKey = accessKey.getPublicKey().toString();
+ 
