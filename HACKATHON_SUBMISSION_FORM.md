@@ -1,27 +1,36 @@
 # NEAR HACKATHON submission worksheet
 
-This is a worksheet, **not a submitted application**. The live [HACKATHON.md](https://nearhackathon.com/HACKATHON.md) was re-read on 2026-11-09. Nick supplies and confirms every field under “What the human decides.” The repository remains local; Nick publishes it.
+Draft only. Official [form](https://nearhackathon.com/#apply) and [rules](https://nearhackathon.com/HACKATHON.md) checked on 2026-11-11. Nick completes the TBD fields and confirms the draft. Deadline: 2026-11-14 23:59 UTC. No application has been sent by this task.
 
-| Application field | Value to confirm |
+| Field | Draft value / requirement |
 | --- | --- |
-| Project name (`projectName`, 2–80 characters) | TBD by Nick (working name: Kuroko) |
-| Team lead's name (`leadName`, 2–80 characters) | TBD by Nick |
-| Contact email (`email`, max 160 characters) | TBD by Nick |
-| Team size (`size`: `1`, `2 - 4`, `4 - 6`, `6 - 8`, `8+`) | TBD by Nick |
-| Tracks (`tracks`) | `business`, `defi` — confirm with Nick |
-| NEAR mainnet payout account (`nearAddress`) | TBD by Nick; Nick creates it, the agent does not |
-| Public repository URL (`projectUrl`) | TBD by Nick; local repository has no remote |
-| Public demo post URL (`demoUrl`) | TBD by Nick |
-| What they built (`idea`, 20–2000 characters) | TBD by Nick; draft below for review |
-| Consent (`consent`) | TBD by Nick after reading the notice below |
-| Idempotency UUID (`requestId`) | Generate once only when the final payload is approved; reuse it for retries |
+| projectName | Kuroko (6 characters; allowed: 2-80) |
+| leadName | TBD Nick (2-80 characters) |
+| email | TBD Nick (valid email; max 160 characters; max 2 submissions per email) |
+| size | TBD Nick: one of `1`, `2 - 4`, `4 - 6`, `6 - 8`, `8+` |
+| tracks | Proposed, best fit first: `defi`, `business`, `security`. `defi`: a USDC share vault and market-maker prototype for NEAR Intents. `business`: a prototype for depositor-governed market-making income; fills and revenue are unbuilt. `security`: pair, inventory and spread checks plus an operator-reported loss pause; these do not restrict off-chain Intents signatures. |
+| nearAddress | TBD Nick: NEAR MAINNET payout account (named or implicit; never use the testnet vault) |
+| projectUrl | TBD: public GitHub repo URL after push (Nick publishes; no remote is configured here) |
+| demoUrl | TBD: the public X post URL |
+| idea | People who want to pool money for swap market making need clear rules for how it can be used. Kuroko is a depositor-governed USDC vault prototype for NEAR Intents. Its NEAR testnet contract accepts NEP-141 USDC, issues shares, handles withdrawals and lets shareholders vote on trading rules. A local dashboard shows live vault state, transaction history and read-only rule checks; MCP tools expose state to agents. The recorded testnet run deposited 0.5 USDC and withdrew 0.2 USDC worth of shares. Quote math and a listen-only relay client are implemented, but relay access is pending. Kuroko has no swap fills or earned fees, and safe mainnet custody is unresolved. The aim is to let depositors share market-making fees within rules they choose. |
+| consent | Nick ticks after agreeing to the notice below |
 
-## Description draft for Nick's review
+Idea character count: **746** (text in the `idea` row only; allowed: 20-2000).
 
-Kuroko is a depositor-governed market-maker prototype for NEAR Intents. It tests a USDC share vault on NEAR testnet, constitution checks for pairs, inventory, spread and loss limits, and a read-only solver that can listen to the authenticated mainnet quote relay. Depositors would share spread from verified fills. The current build has no fills or revenue because partner relay access, mainnet inventory, and a safe restricted signer are not in place. The dashboard and MCP tools expose live testnet state and explicit setup status.
-
-## Consent notice to read verbatim
+Consent notice:
 
 > I agree that the organizers may use these details to review our submission and contact us about this hackathon.
 
-The final submission requires the public repository and a human-authored public X post with @NEARProtocol and #NEARHackathon and a demo video or screenshots. Print the complete JSON payload and obtain Nick's explicit confirmation before making the **one** POST to `https://nearhackathon.com/api/applications`. Do not submit the same repository twice. Deadline: 2026-11-14 23:59 UTC.
+The repo must be public and include LICENSE. Nick must fill the README's other-project disclosure before submission. A local-only demo needs a video in the X post. If using the API later, generate `requestId` once and reuse it on retries; it is an API-only field, not a form field. Print the exact final payload and get Nick's explicit confirmation before submitting. Submit this repository once.
+
+## X post draft
+
+The human posts this text and attaches the video:
+
+```text
+pooled swap liquidity needs clear rules. built Kuroko at NEAR HACKATHON: a USDC share vault on NEAR testnet, with deposits, withdrawals and depositor votes. swap fills are still unbuilt. @NEARProtocol #NEARHackathon
+```
+
+Post character count: **215** (limit: 280).
+
+attach: video TBD

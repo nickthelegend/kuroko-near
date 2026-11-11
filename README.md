@@ -1,14 +1,33 @@
 # Kuroko (黒子)
 
-**Deposit USDC; Kuroko fills other people's swaps on NEAR Intents and shares the fees with you.**
+Kuroko is a depositor-governed USDC vault prototype for NEAR Intents, with live deposits and withdrawals on NEAR testnet.
 
-**Track:** `business` (primary), `defi` (secondary). **Status:** testnet vault with a real deposit and withdrawal on Circle's testnet USDC; swap filling and mainnet market making **BLOCKED** (relay access and a restricted signer).
+People who want to pool money for swap market making need clear rules for how that money can be used. Kuroko tests a shared vault where depositors hold shares and vote on those rules; swap filling and fee sharing are still unbuilt.
 
-Every NEAR Intents swap is filled by a market maker (a "solver") that quotes a price and keeps a small fee. Kuroko pools depositors' USDC to be that market maker, inside rules the depositors vote on (allowed pairs, largest trade, smallest fee, daily loss limit), and the fees raise the value of every share. This repository implements the vault (shares, rules, votes) on NEAR testnet, a web app, an authenticated **listen-only** relay client and a read-only MCP surface. It has **no Kuroko fill, no earned fee, and no safe mainnet depositor custody** yet, and the app says so on every screen.
+## Try it
 
-## Do X → see Y
+There is no hosted demo recorded in this repo. Run these steps from the repository root with Node.js and pnpm 10.29.2. The read-only demo needs no wallet, key or relay access. It needs internet access to NEAR testnet RPC and FastNEAR's transaction index.
 
-1. `pnpm install --frozen-lockfile && pnpm test && pnpm build` → 13 passing tests, zero skipped, and a Vite build. The root test command builds the vault and a real local NEP-141 token, then runs nearcore sandbox tests. It keeps the sandbox binary under this project’s ignored `.tools/` directory. See [TESTING.md](TESTING.md).
+1. Run `pnpm install --frozen-lockfile` - see the workspace dependencies install from the lockfile.
+2. Run `pnpm dev`, then open `http://127.0.0.1:5371/` - see the testnet vault, its rules and recorded deposit/withdrawal history. The recorded Nov 10 state is 0.30 USDC and 0.30 shares; live state may change. APY is “—” because there are no fills.
+3. Open `http://127.0.0.1:5371/position?account=kuroko-lp-346fc6f5.testnet` - see the recorded depositor's position and transactions without connecting a wallet.
+4. On `/`, find “Check a trade against the rules.” Select USDC ↔ wNEAR, size `0.50`, fee `0.30`, and press **Check** - see **Allowed** under the recorded rules. Select USDC ↔ ETH and check again - see **Refused**. This calls the contract's `check_trade` view; it does not execute a swap or restrict an Intents signer.
+5. With Rust, the `wasm32-unknown-unknown` target and `cargo-near` installed, run `pnpm test`, then `pnpm build` - see the test results and production web build. The last recorded run has 13 passing executable tests; see [TESTING.md](TESTING.md). The test script downloads a local nearcore sandbox when needed. Supported automatic downloads: macOS arm64, Linux x86_64 and Linux aarch64; other platforms need `NEAR_SANDBOX_BIN` pointing to a compatible binary.
+
+## Live on NEAR testnet
+
+Main vault: `kuroko-v-83692eef.testnet`. USDC token contract: `3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af` (Circle testnet USDC). These links are copied from [deployments/testnet-live.json](deployments/testnet-live.json):
+
+- Deploy vault: [iYayUZVzWXJCLUMDkuRLGWx5UurrUhddtXSEafHNo2Y](https://testnet.nearblocks.io/txns/iYayUZVzWXJCLUMDkuRLGWx5UurrUhddtXSEafHNo2Y).
+- Acquire testnet USDC on Ref: [DmByBMyAse5ya1Uf71xDhM9bWJcXL3oUpR9GFHy8T8Tx](https://testnet.nearblocks.io/txns/DmByBMyAse5ya1Uf71xDhM9bWJcXL3oUpR9GFHy8T8Tx).
+- Deposit 0.5 USDC: [BkreUSyBXxX2qNjPFqZTwVFWdPseGiF4qQHErcW1Pcnq](https://testnet.nearblocks.io/txns/BkreUSyBXxX2qNjPFqZTwVFWdPseGiF4qQHErcW1Pcnq).
+- Withdraw 0.2 USDC worth of shares: [4dZANf4GyFrjVXPUeZV6hmdWRXvqyXdPo8gDjC2NYXRh](https://testnet.nearblocks.io/txns/4dZANf4GyFrjVXPUeZV6hmdWRXvqyXdPo8gDjC2NYXRh).
+
+The recorded run used a script to deposit and withdraw. A complete browser-wallet deposit has not been verified. The solver is listen-only and has no captured relay session without `PARTNER_JWT`. Kuroko has no swap fills, earned fees or depositor-safe mainnet custody. See [BLOCKED.md](BLOCKED.md).
+
+## More ways to reproduce
+
+1. `pnpm install --frozen-lockfile && pnpm test && pnpm build` → tests and a Vite build (13 passing tests, zero skipped in the recorded run). The root test command builds the vault and a real local NEP-141 token, then runs nearcore sandbox tests. It keeps the sandbox binary under this project’s ignored `.tools/` directory. See [TESTING.md](TESTING.md).
 2. `pnpm dev` → open `http://127.0.0.1:5371`. With no env it reads the vault from the recorded live run (`deployments/testnet-live.json`); `VITE_VAULT_ACCOUNT` and `VITE_USDC_ACCOUNT` override it. Two pages, laid out like a Morpho or Hyperliquid vault page (no illustrations; the numbers are the design):
    - `/` is the vault (`/vault` and the old `/app` show the same page): the one-line pitch, four numbers (total deposits, share price, your position, APY "—" until real fills), a chart of the vault's USDC and share price replayed from every NEP-141 `ft_transfer` event of the vault's transactions (FastNEAR's public testnet transaction index), one deposit/withdraw panel, an activity table with NearBlocks links and one line on fills (Setup required: PARTNER_JWT, no fake rows), the rules with a live `check_trade` test, votes and a propose form, and a collapsed "How Kuroko earns".
    - `/position`: value, shares, share of the vault and earned, plus your own transactions. Without a wallet you can look up any account read-only, for example `/position?account=kuroko-lp-346fc6f5.testnet` (the depositor from the recorded run).
@@ -75,12 +94,20 @@ Only names belong in `.env.example`. The local `.near-credentials/`, `.env`, sol
 
 The repository has not been made public or submitted. Nick must publish it before **2026-11-14 23:59 UTC**, make the demo post, and complete the human fields in [HACKATHON_SUBMISSION_FORM.md](HACKATHON_SUBMISSION_FORM.md). The final API payload requires Nick's explicit confirmation under the [event rules](https://nearhackathon.com/HACKATHON.md).
 
-## Team and other projects
+## Hackathon disclosures
+
+Built for NEAR HACKATHON 2026 (Nov 1-14).
+
+**Prior work.** We treat code from before Nov 1, 2026 as baseline, outside the claimed judging scope. The available Git history starts on Nov 9, 2026 with `6a91d02` (MIT license and gitignore only). It contains no pre-Nov 1 commits. The README has no former project name or named sibling project; there is no tracked NOTICE file. No earlier team code is identified in the available history or provenance notes.
+
+**Built in the window.** Nov 9-10 commits add the NEAR vault, share voting, local NEP-141 test token and tests, quote math and policy checks, listen-only relay client, read-only MCP tools, web dashboard and Meteor testnet wallet integration. The Nov 10 deployment record adds the Circle testnet USDC deposit and withdrawal. Only the NEAR work built in the window is claimed for judging. Review the implementation since the initial scaffold with `git diff 6a91d02..HEAD -- packages scripts package.json pnpm-lock.yaml pnpm-workspace.yaml`. Relay fills, revenue and safe mainnet custody are not completed work.
+
+**Libraries and references.** The build uses near-sdk, near-workspaces, near-api-js, NEAR Wallet Selector with Meteor, React, Vite and the MCP server library, as listed in the package and Cargo manifests. The official [AMM solver](https://github.com/defuse-protocol/near-intents-amm-solver) and [Rhea lending solver](https://github.com/rhea-finance/lending-near-intents-solver-golang) informed the protocol research; the existing provenance notes state that their code was not vendored. The local test token is a project test contract.
+
+**AI-assisted code.** Built with AI coding agents (Claude Code, Codex) under human direction; all code reviewed and tested by the team.
+
+**Other projects by the same team in this hackathon**
 
 Lead: <TBD by Nick>
 
-Other project by this lead, if any: <TBD by Nick>. The lead must disclose any second independent submission under Q-015.
-
-## Build provenance and license
-
-The scaffold is commit `6a91d02`; subsequent commits are this hackathon build. The official [AMM solver](https://github.com/defuse-protocol/near-intents-amm-solver) and [Rhea lending solver](https://github.com/rhea-finance/lending-near-intents-solver-golang) informed the protocol research; their code was not vendored. The local test token is a project test contract. MIT, Copyright (c) 2026 Nivesh Gajengi.
+**License.** MIT. Copyright (c) 2026 Nivesh Gajengi. See [LICENSE](LICENSE).
