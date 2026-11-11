@@ -167,7 +167,7 @@ try{
    credential.secret_key='';credential=undefined;
   }finally{await browser.close();browser=undefined;await stopPreview();}
  });
- run.finishedAt=new Date().toISOString();run.status='PASS';record.spentYocto=charged().toString();save();console.log(`PASS: real browser flow at 1440/375; budget charged ${record.spentYocto} yoctoNEAR. Production contains no QA signer.`);
+ run.finishedAt=new Date().toISOString();run.status='PASS';if(run.reason){run.previousFailureReason=run.reason;delete run.reason;}delete run.failureScreenshot;delete run.failureUiAlerts;record.spentYocto=charged().toString();save();console.log(`PASS: real browser flow at 1440/375; budget charged ${record.spentYocto} yoctoNEAR. Production contains no QA signer.`);
 }catch(e){
  if(credential)credential.secret_key='';
  run.status='FAILED';run.reason=e instanceof Error&&e.message.startsWith('STOP:')?e.message:'Browser E2E failed. Inspect the recorded public transactions and screenshots; secret-bearing errors are not printed.';

@@ -1,0 +1,592 @@
+{
+  "network": "testnet",
+  "rpcUrl": "https://test.rpc.fastnear.com",
+  "vault": "kuroko-v-83692eef.testnet",
+  "depositor": "kuroko-lp-346fc6f5.testnet",
+  "capYocto": "300000000000000000000000",
+  "transactions": [
+    {
+      "ticket": "ad13604c-b284-41c8-b1f0-2901fc0de7e0",
+      "runId": "f5034872-ae63-4a7d-8db3-3a26884d1d0d",
+      "width": 1440,
+      "receiverId": "3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af",
+      "method": "ft_transfer_call",
+      "amountRaw": "10000",
+      "reservedYocto": "10000000000000000000002",
+      "status": "final",
+      "hash": "9AATLmi6iUJBxF2peFu2ChG4jiKNh7cAMGLrN7Jcotut",
+      "explorer": "https://testnet.nearblocks.io/txns/9AATLmi6iUJBxF2peFu2ChG4jiKNh7cAMGLrN7Jcotut",
+      "receiptFailures": 0,
+      "spentYocto": "655700464929200000002",
+      "finalStatus": {
+        "SuccessValue": "IjEwMDAwIg=="
+      },
+      "observedAt": "2026-11-11T16:20:48.742Z"
+    },
+    {
+      "ticket": "a676f57f-7357-43a7-b2d5-57f6bb76e173",
+      "runId": "f5034872-ae63-4a7d-8db3-3a26884d1d0d",
+      "width": 1440,
+      "receiverId": "kuroko-v-83692eef.testnet",
+      "method": "withdraw",
+      "amountRaw": "10000",
+      "reservedYocto": "10000000000000000000002",
+      "status": "final",
+      "hash": "9wJQShyTP53G22VswMnLrkv1eYdHfvDhfX8swRPzjWQq",
+      "explorer": "https://testnet.nearblocks.io/txns/9wJQShyTP53G22VswMnLrkv1eYdHfvDhfX8swRPzjWQq",
+      "receiptFailures": 0,
+      "spentYocto": "606660502662700000002",
+      "finalStatus": {
+        "SuccessValue": ""
+      },
+      "observedAt": "2026-11-11T16:26:20.430Z"
+    },
+    {
+      "ticket": "1b63b84c-6329-42c1-96d8-a226f4403d88",
+      "runId": "f5034872-ae63-4a7d-8db3-3a26884d1d0d",
+      "width": 375,
+      "receiverId": "3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af",
+      "method": "ft_transfer_call",
+      "amountRaw": "10000",
+      "reservedYocto": "10000000000000000000002",
+      "status": "final",
+      "hash": "Bxbsvo1TgMZs9fhBoCTqsk4BxirHfvNeiFAVMAWzWgtf",
+      "explorer": "https://testnet.nearblocks.io/txns/Bxbsvo1TgMZs9fhBoCTqsk4BxirHfvNeiFAVMAWzWgtf",
+      "receiptFailures": 0,
+      "spentYocto": "655700464929200000002",
+      "finalStatus": {
+        "SuccessValue": "IjEwMDAwIg=="
+      },
+      "observedAt": "2026-11-11T16:26:30.630Z"
+    },
+    {
+      "ticket": "e297abb3-717f-42e4-8b1f-b39da6938db1",
+      "runId": "f5034872-ae63-4a7d-8db3-3a26884d1d0d",
+      "width": 375,
+      "receiverId": "kuroko-v-83692eef.testnet",
+      "method": "withdraw",
+      "amountRaw": "10000",
+      "reservedYocto": "10000000000000000000002",
+      "status": "final",
+      "hash": "Gr6VVrfELdM3zv1kDPZiTGWVaErVaojCk3FuWUY9Gag9",
+      "explorer": "https://testnet.nearblocks.io/txns/Gr6VVrfELdM3zv1kDPZiTGWVaErVaojCk3FuWUY9Gag9",
+      "receiptFailures": 0,
+      "spentYocto": "606660502662700000002",
+      "finalStatus": {
+        "SuccessValue": ""
+      },
+      "observedAt": "2026-11-11T16:26:39.133Z"
+    }
+  ],
+  "runs": [
+    {
+      "id": "d33756d6-949e-4f65-98ca-601623afd98a",
+      "startedAt": "2026-11-11T16:18:13.455Z",
+      "steps": [],
+      "status": "FAILED",
+      "reason": "The initial marker check matched the artifact directory name; the harness path check was corrected. No transaction was sent."
+    },
+    {
+      "id": "f5034872-ae63-4a7d-8db3-3a26884d1d0d",
+      "startedAt": "2026-11-11T16:18:49.970Z",
+      "steps": [
+        {
+          "width": 1440,
+          "name": "production-home",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/after-production-home-1440.png"
+        },
+        {
+          "width": 375,
+          "name": "production-home",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/after-production-home-375.png"
+        },
+        {
+          "width": 1440,
+          "name": "before",
+          "snapshot": {
+            "state": {
+              "total_shares": "300000",
+              "usdc_balance": "300000",
+              "paused": false,
+              "daily_loss_usdc": "0",
+              "loss_day": 0,
+              "constitution": {
+                "allowed_pairs": [
+                  "nep141:3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af/nep141:wrap.testnet"
+                ],
+                "max_inventory_usdc": "1000000",
+                "min_spread_bps": 30,
+                "daily_loss_limit_usdc": "100000"
+              }
+            },
+            "shares": "300000",
+            "usdc": "332908",
+            "native": {
+              "amount": "7892531774969692599999997",
+              "block_hash": "GvP25MWExeTNcb6T8pfbqNPf6EZjrn9mzxdKMKLFCyqX",
+              "block_height": 277239180,
+              "code_hash": "11111111111111111111111111111111",
+              "locked": "0",
+              "storage_paid_at": 0,
+              "storage_usage": 182
+            },
+            "vaultNative": {
+              "amount": "9997027247149088499999998",
+              "block_hash": "GvP25MWExeTNcb6T8pfbqNPf6EZjrn9mzxdKMKLFCyqX",
+              "block_height": 277239180,
+              "code_hash": "Aqwqo2YjPQSAdCGbCRVKB9Q35oaeh4k6HPx9VFm6ccem",
+              "locked": "0",
+              "storage_paid_at": 0,
+              "storage_usage": 181560
+            }
+          }
+        },
+        {
+          "width": 1440,
+          "name": "home",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-home-1440.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 1440,
+          "name": "connected",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-connected-1440.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 1440,
+          "name": "deposit-input",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-deposit-input-1440.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 1440,
+          "name": "deposit-confirmed",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-deposit-confirmed-1440.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 1440,
+          "name": "production-home",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/after-production-home-1440.png"
+        },
+        {
+          "width": 375,
+          "name": "production-home",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/after-production-home-375.png"
+        },
+        {
+          "width": 1440,
+          "name": "resume-before",
+          "snapshot": {
+            "state": {
+              "total_shares": "300000",
+              "usdc_balance": "300000",
+              "paused": false,
+              "daily_loss_usdc": "0",
+              "loss_day": 0,
+              "constitution": {
+                "allowed_pairs": [
+                  "nep141:3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af/nep141:wrap.testnet"
+                ],
+                "max_inventory_usdc": "1000000",
+                "min_spread_bps": 30,
+                "daily_loss_limit_usdc": "100000"
+              }
+            },
+            "shares": "300000",
+            "usdc": "332908",
+            "native": {
+              "amount": "7892531774969692599999997",
+              "block_hash": "GvP25MWExeTNcb6T8pfbqNPf6EZjrn9mzxdKMKLFCyqX",
+              "block_height": 277239180,
+              "code_hash": "11111111111111111111111111111111",
+              "locked": "0",
+              "storage_paid_at": 0,
+              "storage_usage": 182
+            },
+            "vaultNative": {
+              "amount": "9997027247149088499999998",
+              "block_hash": "GvP25MWExeTNcb6T8pfbqNPf6EZjrn9mzxdKMKLFCyqX",
+              "block_height": 277239180,
+              "code_hash": "Aqwqo2YjPQSAdCGbCRVKB9Q35oaeh4k6HPx9VFm6ccem",
+              "locked": "0",
+              "storage_paid_at": 0,
+              "storage_usage": 181560
+            }
+          }
+        },
+        {
+          "width": 1440,
+          "name": "home",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-home-1440.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 1440,
+          "name": "connected",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-connected-1440.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 1440,
+          "name": "position-after-deposit",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-position-after-deposit-1440.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 1440,
+          "name": "withdraw-input",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-withdraw-input-1440.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 1440,
+          "name": "withdrawal-confirmed",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-withdrawal-confirmed-1440.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 1440,
+          "name": "position-after-withdrawal",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-position-after-withdrawal-1440.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 1440,
+          "name": "disconnected",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-disconnected-1440.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 1440,
+          "name": "reconciled",
+          "before": {
+            "state": {
+              "total_shares": "300000",
+              "usdc_balance": "300000",
+              "paused": false,
+              "daily_loss_usdc": "0",
+              "loss_day": 0,
+              "constitution": {
+                "allowed_pairs": [
+                  "nep141:3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af/nep141:wrap.testnet"
+                ],
+                "max_inventory_usdc": "1000000",
+                "min_spread_bps": 30,
+                "daily_loss_limit_usdc": "100000"
+              }
+            },
+            "shares": "300000",
+            "usdc": "332908",
+            "native": {
+              "amount": "7892531774969692599999997",
+              "block_hash": "GvP25MWExeTNcb6T8pfbqNPf6EZjrn9mzxdKMKLFCyqX",
+              "block_height": 277239180,
+              "code_hash": "11111111111111111111111111111111",
+              "locked": "0",
+              "storage_paid_at": 0,
+              "storage_usage": 182
+            },
+            "vaultNative": {
+              "amount": "9997027247149088499999998",
+              "block_hash": "GvP25MWExeTNcb6T8pfbqNPf6EZjrn9mzxdKMKLFCyqX",
+              "block_height": 277239180,
+              "code_hash": "Aqwqo2YjPQSAdCGbCRVKB9Q35oaeh4k6HPx9VFm6ccem",
+              "locked": "0",
+              "storage_paid_at": 0,
+              "storage_usage": 181560
+            }
+          },
+          "after": {
+            "state": {
+              "total_shares": "300000",
+              "usdc_balance": "300000",
+              "paused": false,
+              "daily_loss_usdc": "0",
+              "loss_day": 0,
+              "constitution": {
+                "allowed_pairs": [
+                  "nep141:3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af/nep141:wrap.testnet"
+                ],
+                "max_inventory_usdc": "1000000",
+                "min_spread_bps": 30,
+                "daily_loss_limit_usdc": "100000"
+              }
+            },
+            "shares": "300000",
+            "usdc": "332908",
+            "native": {
+              "amount": "7891269414002100699999996",
+              "block_hash": "14dLpp47TTy8kuMkL8zEgdqWMnM9EJfUAdeRMGp6XPS8",
+              "block_height": 277239744,
+              "code_hash": "11111111111111111111111111111111",
+              "locked": "0",
+              "storage_paid_at": 0,
+              "storage_usage": 182
+            },
+            "vaultNative": {
+              "amount": "9997027247149088499999997",
+              "block_hash": "A6umXhCZm4rr2g6ANwA8STVANvUomknhTL55JCh6FeG3",
+              "block_height": 277239745,
+              "code_hash": "Aqwqo2YjPQSAdCGbCRVKB9Q35oaeh4k6HPx9VFm6ccem",
+              "locked": "0",
+              "storage_paid_at": 0,
+              "storage_usage": 181560
+            }
+          }
+        },
+        {
+          "width": 375,
+          "name": "before",
+          "snapshot": {
+            "state": {
+              "total_shares": "300000",
+              "usdc_balance": "300000",
+              "paused": false,
+              "daily_loss_usdc": "0",
+              "loss_day": 0,
+              "constitution": {
+                "allowed_pairs": [
+                  "nep141:3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af/nep141:wrap.testnet"
+                ],
+                "max_inventory_usdc": "1000000",
+                "min_spread_bps": 30,
+                "daily_loss_limit_usdc": "100000"
+              }
+            },
+            "shares": "300000",
+            "usdc": "332908",
+            "native": {
+              "amount": "7891269414002100699999996",
+              "block_hash": "AezXjWPir4bPtBurkRE4kPLqrnQg5epmfgvWUAP3Fwvc",
+              "block_height": 277239747,
+              "code_hash": "11111111111111111111111111111111",
+              "locked": "0",
+              "storage_paid_at": 0,
+              "storage_usage": 182
+            },
+            "vaultNative": {
+              "amount": "9997027247149088499999997",
+              "block_hash": "AezXjWPir4bPtBurkRE4kPLqrnQg5epmfgvWUAP3Fwvc",
+              "block_height": 277239747,
+              "code_hash": "Aqwqo2YjPQSAdCGbCRVKB9Q35oaeh4k6HPx9VFm6ccem",
+              "locked": "0",
+              "storage_paid_at": 0,
+              "storage_usage": 181560
+            }
+          }
+        },
+        {
+          "width": 375,
+          "name": "home",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-home-375.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 375,
+          "name": "connected",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-connected-375.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 375,
+          "name": "deposit-input",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-deposit-input-375.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 375,
+          "name": "deposit-confirmed",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-deposit-confirmed-375.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 375,
+          "name": "position-after-deposit",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-position-after-deposit-375.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 375,
+          "name": "withdraw-input",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-withdraw-input-375.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 375,
+          "name": "withdrawal-confirmed",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-withdrawal-confirmed-375.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 375,
+          "name": "position-after-withdrawal",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-position-after-withdrawal-375.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 375,
+          "name": "disconnected",
+          "screenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-disconnected-375.png",
+          "overflow": 0,
+          "consoleOrPageErrors": 0,
+          "failedRequests": 0,
+          "httpErrors": 0
+        },
+        {
+          "width": 375,
+          "name": "reconciled",
+          "before": {
+            "state": {
+              "total_shares": "300000",
+              "usdc_balance": "300000",
+              "paused": false,
+              "daily_loss_usdc": "0",
+              "loss_day": 0,
+              "constitution": {
+                "allowed_pairs": [
+                  "nep141:3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af/nep141:wrap.testnet"
+                ],
+                "max_inventory_usdc": "1000000",
+                "min_spread_bps": 30,
+                "daily_loss_limit_usdc": "100000"
+              }
+            },
+            "shares": "300000",
+            "usdc": "332908",
+            "native": {
+              "amount": "7891269414002100699999996",
+              "block_hash": "AezXjWPir4bPtBurkRE4kPLqrnQg5epmfgvWUAP3Fwvc",
+              "block_height": 277239747,
+              "code_hash": "11111111111111111111111111111111",
+              "locked": "0",
+              "storage_paid_at": 0,
+              "storage_usage": 182
+            },
+            "vaultNative": {
+              "amount": "9997027247149088499999997",
+              "block_hash": "AezXjWPir4bPtBurkRE4kPLqrnQg5epmfgvWUAP3Fwvc",
+              "block_height": 277239747,
+              "code_hash": "Aqwqo2YjPQSAdCGbCRVKB9Q35oaeh4k6HPx9VFm6ccem",
+              "locked": "0",
+              "storage_paid_at": 0,
+              "storage_usage": 181560
+            }
+          },
+          "after": {
+            "state": {
+              "total_shares": "300000",
+              "usdc_balance": "300000",
+              "paused": false,
+              "daily_loss_usdc": "0",
+              "loss_day": 0,
+              "constitution": {
+                "allowed_pairs": [
+                  "nep141:3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af/nep141:wrap.testnet"
+                ],
+                "max_inventory_usdc": "1000000",
+                "min_spread_bps": 30,
+                "daily_loss_limit_usdc": "100000"
+              }
+            },
+            "shares": "300000",
+            "usdc": "332908",
+            "native": {
+              "amount": "7890007053034508799999995",
+              "block_hash": "J9pognUHt5YSMDtLsVhd8GmnEAeTepGHTZBmvSBWeEZi",
+              "block_height": 277239778,
+              "code_hash": "11111111111111111111111111111111",
+              "locked": "0",
+              "storage_paid_at": 0,
+              "storage_usage": 182
+            },
+            "vaultNative": {
+              "amount": "9997027247149088499999996",
+              "block_hash": "6xGkB2NkF6QkXBAe6uKPNbEqYnKYSMpmKKMxiNrmafUW",
+              "block_height": 277239779,
+              "code_hash": "Aqwqo2YjPQSAdCGbCRVKB9Q35oaeh4k6HPx9VFm6ccem",
+              "locked": "0",
+              "storage_paid_at": 0,
+              "storage_usage": 181560
+            }
+          }
+        }
+      ],
+      "status": "PASS",
+      "resumedAt": "2026-11-11T16:26:01.179Z",
+      "previousFailureScreenshot": "/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/f5034872-ae63-4a7d-8db3-3a26884d1d0d-failure-1440.png",
+      "finishedAt": "2026-11-11T16:26:41.109Z",
+      "previousFailureReason": "Browser E2E failed. Inspect the recorded public transactions and screenshots; secret-bearing errors are not printed."
+    }
+  ],
+  "productionIsolation": {
+    "passed": true,
+    "mode": "production",
+    "flagDuringBuild": "1",
+    "markers": [
+      "qa-signer",
+      "__KUROKO_QA",
+      "QA signer"
+    ],
+    "matchingFiles": 0
+  },
+  "spentYocto": "2524721935183800000008"
+}
