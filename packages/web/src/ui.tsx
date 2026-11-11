@@ -76,17 +76,18 @@ export function Copy({value}:{value:string}){
 export type Live<T>={state:'loading'}|{state:'ok';value:T;at:number}|{state:'error';message:string;value?:T};
 /** Polls a loader; on an error it keeps the last good value so the page never flashes empty. */
 export function useLive<T>(load:()=>Promise<T>,every=0,deps:unknown[]=[]):[Live<T>,()=>void]{
-  const [live,setLive]=useState<Live<T>>({state:'loading'});
+  const [live,setLive]=useState<{deps:unknown[];result:Live<T>}>({deps,result:{state:'loading'}});
+  const same=(a:unknown[],b:unknown[])=>a.length===b.length&&a.every((v,i)=>Object.is(v,b[i]));
   const [tick,setTick]=useState(0);
   useEffect(()=>{
     let on=true;
-    const run=()=>load().then(value=>on&&setLive({state:'ok',value,at:Date.now()})).catch(e=>on&&setLive(prev=>({state:'error',message:(e as Error).message,value:'value' in prev?prev.value:undefined})));
+    const run=()=>load().then(value=>on&&setLive({deps,result:{state:'ok',value,at:Date.now()}})).catch(e=>on&&setLive(prev=>({deps,result:{state:'error',message:(e as Error).message,value:same(prev.deps,deps)&&'value' in prev.result?prev.result.value:undefined}}))); 
     run();
     const t=every?setInterval(run,every):undefined;
     return()=>{on=false;if(t)clearInterval(t);};
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[tick,...deps]);
-  return [live,()=>setTick(t=>t+1)];
+  return [same(live.deps,deps)?live.result:{state:'loading'},()=>setTick(t=>t+1)];
 }
 export const valueOf=<T,>(l:Live<T>):T|undefined=>'value' in l?l.value:undefined;
 

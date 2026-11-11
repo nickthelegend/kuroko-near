@@ -15,7 +15,7 @@ export default function VaultPage({data,wallet}:{data:Data;wallet:Wallet}){
   const readAt=data.vault.state==='ok'?data.vault.at:null;
   const mismatch=h&&v&&(h.cash!==BigInt(v.usdc_balance)||h.shares!==BigInt(v.total_shares));
   const price=v?sharePrice(v.usdc_balance,v.total_shares):null;
-  const [mine]=useLive(async()=>wallet.account?view<string>(vaultId,'shares_of',{account_id:wallet.account}):null,20000,[wallet.account]);
+  const [mine]=useLive(async()=>wallet.account?view<string>(vaultId,'shares_of',{account_id:wallet.account}):null,20000,[wallet.account,v?.total_shares]);
   const myShares=valueOf(mine);
   const unavailable=data.vault.state==='error'||proposals.state==='error'?'Vault unavailable':data.vault.state==='loading'||proposals.state==='loading'?'Loading vault…':undefined;
   const status=!v?(data.vault.state==='error'?'Unavailable':'Loading'):proposals.state==='error'?'Rules unavailable':v.paused?'Paused':openVote?'Locked during a vote':'Open for deposits';
@@ -161,7 +161,7 @@ function Rules({data,wallet,proposals,locked,refresh,proposalError}:{data:Data;w
   const c=valueOf(data.vault)?.constitution;
   const [msg,setMsg]=useState<{ok:boolean;text:string;hash?:string}|null>(null);
   async function act(method:string,args:object,label:string){setMsg(null);try{const hash=await wallet.call(method,args);setMsg({ok:true,text:label,hash});refresh();}catch(e){setMsg({ok:false,text:(e as Error).message});}}
-  const [shares]=useLive(async()=>wallet.account?view<string>(vaultId,'shares_of',{account_id:wallet.account}):'0',30000,[wallet.account]);
+  const [shares]=useLive(async()=>wallet.account?view<string>(vaultId,'shares_of',{account_id:wallet.account}):'0',30000,[wallet.account,valueOf(data.vault)?.total_shares]);
   const isHolder=(valueOf(shares)??'0')!=='0';
   return <section className="block" id="rules" aria-labelledby="rules-h">
     <div className="block-head"><h2 id="rules-h">Rules</h2><span className="muted">Changed only by a depositor vote</span></div>

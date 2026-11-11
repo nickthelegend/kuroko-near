@@ -10,9 +10,11 @@ const ACCOUNT_RE=/^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/;
 export default function Position({data,wallet}:{data:Data;wallet:Wallet}){
   const [query,setQuery]=useState(()=>new URLSearchParams(location.search).get('account')||'');
   useEffect(()=>{const on=()=>setQuery(new URLSearchParams(location.search).get('account')||'');addEventListener('popstate',on);return()=>removeEventListener('popstate',on);},[]);
-  const account=wallet.account||query;
+  const requested=wallet.account||query;
+  const invalid=!!requested&&(!ACCOUNT_RE.test(requested)||requested.length<2||requested.length>64);
+  const account=invalid?'':requested;
   const readOnly=!wallet.account&&!!query;
-  const [shares]=useLive(async()=>account?view<string>(vaultId,'shares_of',{account_id:account}):null,15000,[account]);
+  const [shares]=useLive(async()=>account?view<string>(vaultId,'shares_of',{account_id:account}):null,15000,[account,valueOf(data.vault)?.total_shares]);
   const v=valueOf(data.vault);
   const h=valueOf(data.history);
   const s=valueOf(shares);
@@ -33,7 +35,7 @@ export default function Position({data,wallet}:{data:Data;wallet:Wallet}){
       <label className="field"><span>Or look up any account, read-only</span>
         <span className="lookup-row"><input value={lookup} onChange={e=>setLookup(e.target.value)} placeholder="name.testnet" autoCapitalize="off" spellCheck={false}/><button className="btn btn-line">View</button></span>
       </label>
-      {lookupErr&&<p className="err" role="alert">{lookupErr}</p>}
+      {(lookupErr||invalid)&&<p className="err" role="alert">{lookupErr||'Enter a NEAR account ID, like name.testnet'}</p>}
       {exampleDepositor&&<p className="fine">For example, the depositor from the recorded testnet run: <a className="mono" href={`/position?account=${exampleDepositor}`} onClick={e=>{e.preventDefault();look(exampleDepositor);}}>{short(exampleDepositor,12,8)}</a></p>}
     </form>
   </div>;
