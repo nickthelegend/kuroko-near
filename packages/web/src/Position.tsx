@@ -46,6 +46,7 @@ export default function Position({data,wallet}:{data:Data;wallet:Wallet}){
       <p className="vh-meta"><a className="mono" href={nearblocksAccount(account)} target="_blank" rel="noreferrer">{short(account,18,8)}</a>
         {readOnly&&<><span className="sep" aria-hidden="true">·</span>Read-only<span className="sep" aria-hidden="true">·</span><a href="/position" onClick={e=>{e.preventDefault();navigate('/position');}}>Clear</a></>}</p>
     </header>
+    {data.vault.state==='error'&&<p className="err" role="alert">{data.vault.message}</p>}
     {shares.state==='error'&&<p className="err" role="alert">{shares.message}</p>}
     <section className="stats" aria-label="Position numbers">
       <Stat label="Value" value={value!=null?usdc(value):'—'} unit="USDC"/>
@@ -55,6 +56,7 @@ export default function Position({data,wallet}:{data:Data;wallet:Wallet}){
     </section>
     <section className="block" aria-labelledby="pact-h">
       <div className="block-head"><h2 id="pact-h">Activity</h2>{net!=null&&<span className="muted">Net deposited {usdc(net)} USDC</span>}</div>
+      {data.history.state==='error'&&h&&<p className="err" role="alert">History could not refresh: {data.history.message}</p>}
       {!h?(data.history.state==='error'?<p className="err" role="alert">{data.history.message}</p>:<div className="sk sk-rows" aria-busy="true"><span/><span/></div>)
         :mine.length===0?<p className="empty">No deposits from this account. <a href="/" onClick={e=>{e.preventDefault();navigate('/');}}>Deposit on the vault page</a>.</p>
         :<table className="table">

@@ -190,7 +190,7 @@ function Rules({data,wallet,proposals,locked,refresh,proposalError}:{data:Data;w
             </div>
           </li>;})}</ul>}
       {msg&&<p className={msg.ok?'ok':'err'} role={msg.ok?'status':'alert'}>{msg.text}{msg.hash&&<> · <a href={nearblocksTx(msg.hash)} target="_blank" rel="noreferrer">{short(msg.hash,6,4)}</a></>}</p>}
-      {c&&<Propose c={c} wallet={wallet} isHolder={isHolder} locked={locked} refresh={refresh}/>}
+      {c&&<Propose unavailable={!!proposalError} c={c} wallet={wallet} isHolder={isHolder} locked={locked} refresh={refresh}/>}
     </div>
   </section>;
 }
@@ -230,7 +230,7 @@ function TradeCheck({pairs,minSpread}:{pairs:string[];minSpread?:number}){
   </form>;
 }
 
-function Propose({c,wallet,isHolder,locked,refresh}:{c:Constitution;wallet:Wallet;isHolder:boolean;locked:boolean;refresh:()=>void}){
+function Propose({c,wallet,isHolder,locked,refresh,unavailable}:{c:Constitution;wallet:Wallet;isHolder:boolean;locked:boolean;refresh:()=>void;unavailable:boolean}){
   const [draft,setDraft]=useState({pairs:c.allowed_pairs.join('\n'),cap:decimal(c.max_inventory_usdc).replace(/,/g,''),spread:String(c.min_spread_bps),loss:decimal(c.daily_loss_limit_usdc).replace(/,/g,'')});
   const [msg,setMsg]=useState<{ok:boolean;text:string;hash?:string}|null>(null);
   const set=(k:keyof typeof draft)=>(e:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>)=>setDraft(d=>({...d,[k]:e.target.value}));
@@ -243,7 +243,7 @@ function Propose({c,wallet,isHolder,locked,refresh}:{c:Constitution;wallet:Walle
       const hash=await wallet.call('propose',{constitution});setMsg({ok:true,text:'Vote opened for 24 hours',hash});refresh();
     }catch(err){setMsg({ok:false,text:(err as Error).message});}
   }
-  const reason=!wallet.account?'Connect a testnet wallet to propose.':!isHolder?'Only depositors can propose.':locked?'A vote is already open.':'';
+  const reason=unavailable?'Votes could not load. Please retry.':!wallet.account?'Connect a testnet wallet to propose.':!isHolder?'Only depositors can propose.':locked?'A vote is already open.':'';
   return <details className="propose">
     <summary>Propose new rules<Icon name="chevron"/></summary>
     <form onSubmit={submit}>
