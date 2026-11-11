@@ -26,7 +26,7 @@ export default function VaultPage({data,wallet}:{data:Data;wallet:Wallet}){
         <span className="vh-icon" aria-hidden="true">$</span>
         <h1>Kuroko USDC</h1>
       </div>
-      <p className="vh-desc">Deposit USDC; Kuroko fills other people’s swaps on NEAR Intents and shares the fees with you.</p>
+      <p className="vh-desc">A USDC vault prototype for NEAR Intents. Deposits and withdrawals are live on testnet; swap fills are not built yet.</p>
       <p className="vh-meta">
         <span className="nowrap"><span className={`dot ${v?.paused?'dot-bad':v?'dot-ok':''}`}/>{status}</span>
         <span className="sep" aria-hidden="true">·</span>
@@ -73,8 +73,8 @@ export default function VaultPage({data,wallet}:{data:Data;wallet:Wallet}){
       <details className="how" id="how">
         <summary><h2>How Kuroko earns</h2><Icon name="chevron"/></summary>
         <div className="how-body">
-          <p>Every swap on NEAR Intents is filled by a market maker who quotes a price and keeps a small fee. Kuroko pools depositors’ USDC to be that market maker, only within the rules above.</p>
-          <p>Fees stay in the vault, so each share is worth more USDC over time. You can withdraw whenever no vote is open.</p>
+          <p>Every swap on NEAR Intents is filled by a market maker who quotes a price and keeps a small fee. Kuroko aims to pool depositors’ USDC to be that market maker, within rules they choose.</p>
+          <p>The aim is to retain fees in the vault for shareholders. Today there are no fees, and the rule checks do not restrict an off-chain Intents signer. Deposits and withdrawals are locked while a vote is open.</p>
           <p>Today on testnet the vault, deposits, withdrawals, rules and votes are live. Filling swaps waits on NEAR Intents relay access, and there is no mainnet version. Kuroko has not filled a swap or earned a fee.</p>
         </div>
       </details>
@@ -97,6 +97,7 @@ function TradeCard({data,wallet,locked,myShares,unavailable}:{data:Data;wallet:W
     try{
       if(unavailable)throw Error(unavailable);
       const raw=rawUnits(amount);let hash='';
+      if(max!==null&&BigInt(raw)>BigInt(max))throw Error(mode==='deposit'?'Amount exceeds your USDC balance.':'Amount exceeds your shares.');
       if(mode==='deposit')hash=await wallet.call('ft_transfer_call',{receiver_id:vaultId,amount:raw,msg:''},{deposit:'1',receiver:usdcId});
       else hash=await wallet.call('withdraw',{shares:raw});
       setMsg({ok:true,text:mode==='deposit'?'Deposit confirmed':'Withdrawal confirmed',hash});setAmount('');data.refresh();refreshBal();
@@ -126,7 +127,7 @@ function TradeCard({data,wallet,locked,myShares,unavailable}:{data:Data;wallet:W
       </dl>
       {!wallet.account
         ?<button type="button" className="btn btn-ink wide" onClick={()=>void wallet.connect()} disabled={!wallet.ready}>Connect wallet</button>
-        :<button className="btn btn-ink wide" disabled={wallet.busy||locked||!amount||!!unavailable||!!v?.paused}>{unavailable??(locked?'Locked during a vote':v?.paused?'Vault paused':wallet.busy?'Confirm in your wallet…':mode==='deposit'?'Deposit':'Withdraw')}</button>}
+        :<button className="btn btn-ink wide" disabled={wallet.busy||locked||!amount||!!unavailable||(mode==='deposit'&&!!v?.paused)}>{unavailable??(locked?'Locked during a vote':mode==='deposit'&&v?.paused?'Vault paused':wallet.busy?'Confirm in your wallet…':mode==='deposit'?'Deposit':'Withdraw')}</button>}
       {msg&&<p className={msg.ok?'ok':'err'} role={msg.ok?'status':'alert'}>{msg.text}{msg.hash&&<> · <a href={nearblocksTx(msg.hash)} target="_blank" rel="noreferrer">{short(msg.hash,6,4)}</a></>}</p>}
       <p className="fine">Circle testnet USDC on NEAR. <a href="https://faucet.circle.com/" target="_blank" rel="noreferrer">Get some from the faucet</a>.</p>
     </form>
@@ -202,11 +203,11 @@ function TradeCheck({pairs,minSpread}:{pairs:string[];minSpread?:number}){
   const [fee,setFee]=useState('');
   const [res,setRes]=useState<{state:'idle'|'busy'}|{state:'ok';pass:boolean;for:string}|{state:'error';message:string}>({state:'idle'});
   useEffect(()=>{if(!pair&&pairs[0])setPair(pairs[0]);},[pairs,pair]);
-  useEffect(()=>{if(!fee&&minSpread!==undefined)setFee((minSpread/100).toFixed(2));},[minSpread,fee]);
+  useEffect(()=>{setFee(minSpread===undefined?'':(minSpread/100).toFixed(2));},[minSpread]);
   async function ask(e:React.FormEvent){
     e.preventDefault();
     try{
-      const pct=Number(fee);if(!Number.isFinite(pct)||pct<0||pct>=100)throw new Error('Fee must be a percentage from 0 to 99.99');
+      const pct=Number(fee);if(!fee.trim()||!Number.isFinite(pct)||pct<0||pct>=100)throw new Error('Fee must be a percentage from 0 to 99.99');
       setRes({state:'busy'});
       const pass=await view<boolean>(vaultId,'check_trade',{pair,inventory_usdc:rawUnits(inv),spread_bps:Math.round(pct*100)});
       setRes({state:'ok',pass,for:`${pairLabel(pair)}, ${inv} USDC at ${pct}%`});
