@@ -19,15 +19,16 @@ export async function view<T>(account:string,method:string,args:object={}):Promi
   const bytes=new TextEncoder().encode(JSON.stringify(args));
   const binary=Array.from(bytes,b=>String.fromCharCode(b)).join('');
   const body={jsonrpc:'2.0',id:'kuroko-web',method:'query',params:{request_type:'call_function',finality:'final',account_id:account,method_name:method,args_base64:btoa(binary)}};
-  const post=()=>fetch(rpcUrl,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+  const post=()=>fetch(rpcUrl,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)});
   let response:Response;
   try{response=await post();}
   catch{await new Promise(r=>setTimeout(r,900));try{response=await post();}catch(e){throw new Error(`NEAR testnet RPC unreachable at ${new URL(rpcUrl).host} (${(e as Error).message}). Retrying on the next refresh.`);}}
   if(!response.ok)throw new Error(`NEAR testnet RPC HTTP ${response.status}`);
-  const json=await response.json();
-  if(json.error)throw new Error(`NEAR testnet RPC: ${json.error.message||JSON.stringify(json.error)}`);
-  const result=new Uint8Array(json.result?.result||[]);
-  return JSON.parse(new TextDecoder().decode(result)) as T;
+  try{
+    const json=await response.json();
+    if(json.error||!Array.isArray(json.result?.result))throw new Error('unavailable');
+    return JSON.parse(new TextDecoder().decode(new Uint8Array(json.result.result))) as T;
+  }catch{throw new Error('NEAR testnet could not read this contract. Please retry; the page also refreshes automatically.');}
 }
 export const loadVault=()=>view<VaultState>(vaultId,'state');
 export async function solverState():Promise<SolverState>{

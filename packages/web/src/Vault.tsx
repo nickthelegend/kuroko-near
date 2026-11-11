@@ -17,7 +17,8 @@ export default function VaultPage({data,wallet}:{data:Data;wallet:Wallet}){
   const price=v?sharePrice(v.usdc_balance,v.total_shares):null;
   const [mine]=useLive(async()=>wallet.account?view<string>(vaultId,'shares_of',{account_id:wallet.account}):null,20000,[wallet.account]);
   const myShares=valueOf(mine);
-  const status=!v?'Loading':v.paused?'Paused':openVote?'Withdrawals locked during a vote':'Open for deposits';
+  const unavailable=data.vault.state==='error'||proposals.state==='error'?'Vault unavailable':data.vault.state==='loading'||proposals.state==='loading'?'Loading vault…':undefined;
+  const status=!v?(data.vault.state==='error'?'Unavailable':'Loading'):proposals.state==='error'?'Rules unavailable':v.paused?'Paused':openVote?'Locked during a vote':'Open for deposits';
 
   return <div className="wrap vault">
     <header className="vhead">
@@ -44,7 +45,7 @@ export default function VaultPage({data,wallet}:{data:Data;wallet:Wallet}){
     </section>
     {data.vault.state==='error'&&<p className="err" role="alert">{data.vault.message}</p>}
 
-    <aside className="side"><TradeCard data={data} wallet={wallet} locked={!!openVote} myShares={myShares??null}/></aside>
+    <aside className="side"><TradeCard data={data} wallet={wallet} locked={!!openVote} myShares={myShares??null} unavailable={unavailable}/></aside>
 
     <section className="block chart-block" aria-labelledby="chart-h">
       <div className="block-head">
@@ -54,6 +55,7 @@ export default function VaultPage({data,wallet}:{data:Data;wallet:Wallet}){
           <button type="button" aria-pressed={metric==='price'} onClick={()=>setMetric('price')}>Share price</button>
         </div>
       </div>
+      {data.history.state==='error'&&h&&<p className="err" role="alert">History could not refresh: {data.history.message}</p>}
       {h?<ValueChart points={h.points} metric={metric}/>:data.history.state==='error'?<p className="err" role="alert">History unavailable: {data.history.message}</p>:<div className="sk sk-chart" aria-busy="true"/>}
       <p className="fine">Rebuilt from every USDC transfer in and out of the vault.{readAt&&` Contract read ${ago(readAt,now)}.`}</p>
       {mismatch&&<p className="fine">The transfer index shows {usdc(h.cash)} USDC; the contract shows {usdc(v.usdc_balance)} USDC. The index can lag a few blocks.</p>}
@@ -66,7 +68,7 @@ export default function VaultPage({data,wallet}:{data:Data;wallet:Wallet}){
         <Fills/>
       </section>
 
-      <Rules data={data} wallet={wallet} proposals={valueOf(proposals)??null} locked={!!openVote} refresh={()=>{data.refresh();refreshProposals();}}/>
+      <Rules proposalError={proposals.state==='error'?proposals.message:undefined} data={data} wallet={wallet} proposals={valueOf(proposals)??null} locked={!!openVote} refresh={()=>{data.refresh();refreshProposals();}}/>
 
       <details className="how" id="how">
         <summary><h2>How Kuroko earns</h2><Icon name="chevron"/></summary>
@@ -80,19 +82,20 @@ export default function VaultPage({data,wallet}:{data:Data;wallet:Wallet}){
   </div>;
 }
 
-function TradeCard({data,wallet,locked,myShares}:{data:Data;wallet:Wallet;locked:boolean;myShares:string|null}){
+function TradeCard({data,wallet,locked,myShares,unavailable}:{data:Data;wallet:Wallet;locked:boolean;myShares:string|null;unavailable?:string}){
   const v=valueOf(data.vault);
   const [mode,setMode]=useState<'deposit'|'withdraw'>('deposit');
   const [amount,setAmount]=useState('');
   const [msg,setMsg]=useState<{ok:boolean;text:string;hash?:string}|null>(null);
   const [bal,refreshBal]=useLive(async()=>wallet.account?view<string>(usdcId,'ft_balance_of',{account_id:wallet.account}):null,20000,[wallet.account]);
   const wal=valueOf(bal)??null;
-  const price=v?sharePrice(v.usdc_balance,v.total_shares):1_000_000n;
+  const price=v?sharePrice(v.usdc_balance,v.total_shares):null;
   let preview='';
-  try{const raw=BigInt(rawUnits(amount));preview=mode==='deposit'?`${decimal(raw*1_000_000n/price,6,4)} shares`:`${usdc(raw*price/1_000_000n)} USDC`;}catch{preview='';}
+  try{if(price===null||price<=0n)throw Error('Vault unavailable');const raw=BigInt(rawUnits(amount));preview=mode==='deposit'?`${decimal(raw*1_000_000n/price,6,4)} shares`:`${usdc(raw*price/1_000_000n)} USDC`;}catch{preview='';}
   async function submit(e:React.FormEvent){
     e.preventDefault();setMsg(null);
     try{
+      if(unavailable)throw Error(unavailable);
       const raw=rawUnits(amount);let hash='';
       if(mode==='deposit')hash=await wallet.call('ft_transfer_call',{receiver_id:vaultId,amount:raw,msg:''},{deposit:'1',receiver:usdcId});
       else hash=await wallet.call('withdraw',{shares:raw});
@@ -119,11 +122,11 @@ function TradeCard({data,wallet,locked,myShares}:{data:Data;wallet:Wallet;locked
       </label>
       <dl className="facts">
         <div><dt>{mode==='deposit'?'You get':'You receive'}</dt><dd>{preview||'—'}</dd></div>
-        <div><dt>Share price</dt><dd>{decimal(price,6,4)} USDC</dd></div>
+        <div><dt>Share price</dt><dd>{price===null?'—':decimal(price,6,4)} USDC</dd></div>
       </dl>
       {!wallet.account
         ?<button type="button" className="btn btn-ink wide" onClick={()=>void wallet.connect()} disabled={!wallet.ready}>Connect wallet</button>
-        :<button className="btn btn-ink wide" disabled={wallet.busy||locked||!amount||!!v?.paused}>{locked?'Locked during a vote':v?.paused?'Vault paused':wallet.busy?'Confirm in your wallet…':mode==='deposit'?'Deposit':'Withdraw'}</button>}
+        :<button className="btn btn-ink wide" disabled={wallet.busy||locked||!amount||!!unavailable||!!v?.paused}>{unavailable??(locked?'Locked during a vote':v?.paused?'Vault paused':wallet.busy?'Confirm in your wallet…':mode==='deposit'?'Deposit':'Withdraw')}</button>}
       {msg&&<p className={msg.ok?'ok':'err'} role={msg.ok?'status':'alert'}>{msg.text}{msg.hash&&<> · <a href={nearblocksTx(msg.hash)} target="_blank" rel="noreferrer">{short(msg.hash,6,4)}</a></>}</p>}
       <p className="fine">Circle testnet USDC on NEAR. <a href="https://faucet.circle.com/" target="_blank" rel="noreferrer">Get some from the faucet</a>.</p>
     </form>
@@ -154,7 +157,7 @@ function Fills(){
   return <p className="fine">Swap fills: none yet. Filling needs NEAR Intents relay access (Setup required: PARTNER_JWT){s.state==='error'?`; solver: ${s.message}`:''}.</p>;
 }
 
-function Rules({data,wallet,proposals,locked,refresh}:{data:Data;wallet:Wallet;proposals:Proposal[]|null;locked:boolean;refresh:()=>void}){
+function Rules({data,wallet,proposals,locked,refresh,proposalError}:{data:Data;wallet:Wallet;proposals:Proposal[]|null;locked:boolean;refresh:()=>void;proposalError?:string}){
   const c=valueOf(data.vault)?.constitution;
   const [msg,setMsg]=useState<{ok:boolean;text:string;hash?:string}|null>(null);
   async function act(method:string,args:object,label:string){setMsg(null);try{const hash=await wallet.call(method,args);setMsg({ok:true,text:label,hash});refresh();}catch(e){setMsg({ok:false,text:(e as Error).message});}}
@@ -171,7 +174,7 @@ function Rules({data,wallet,proposals,locked,refresh}:{data:Data;wallet:Wallet;p
     <TradeCheck pairs={c?.allowed_pairs??[]} minSpread={c?.min_spread_bps}/>
     <div className="votes">
       <h3>Votes</h3>
-      {!proposals?<div className="sk sk-rows" aria-busy="true"><span/></div>:proposals.length===0
+      {proposalError?<p className="err" role="alert">Votes unavailable: {proposalError}</p>:!proposals?<div className="sk sk-rows" aria-busy="true"><span/></div>:proposals.length===0
         ?<p className="muted">No votes yet. A rule change needs a 24-hour vote with more than half of all shares.</p>
         :<ul className="vote-list">{proposals.slice().reverse().map(p=>{
           const open=!p.executed&&Date.now()<p.closes_at_ms;const voted=p.voters.includes(wallet.account);

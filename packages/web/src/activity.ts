@@ -16,10 +16,10 @@ type FullTx={transaction:{hash:string;signer_id:string;receiver_id:string;action
 
 async function post<T>(path:string,body:object):Promise<T>{
   let r:Response;
-  try{r=await fetch(`${INDEX}/${path}`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});}
+  try{r=await fetch(`${INDEX}/${path}`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)});}
   catch(e){throw new Error(`Testnet transaction index unreachable (${(e as Error).message})`);}
   if(!r.ok)throw new Error(`Testnet transaction index HTTP ${r.status}`);
-  return r.json() as Promise<T>;
+  try{return await r.json() as T;}catch{throw new Error('The testnet transaction index returned unreadable data. Please retry.');}
 }
 
 function withdrawShares(tx:FullTx):bigint{
@@ -32,10 +32,12 @@ function withdrawShares(tx:FullTx):bigint{
 
 export async function loadHistory(vault=vaultId,usdc=usdcId):Promise<History>{
   const list=await post<{account_txs:{transaction_hash:string;tx_block_height:number}[]}>('account',{account_id:vault});
+  if(!Array.isArray(list.account_txs))throw new Error('The testnet transaction index returned no transaction list. Please retry.');
   const hashes=[...new Set(list.account_txs.map(t=>t.transaction_hash))];
   const txs:FullTx[]=[];
   for(let i=0;i<hashes.length;i+=20){
     const chunk=await post<{transactions:(FullTx|null)[]}>('transactions',{tx_hashes:hashes.slice(i,i+20)});
+    if(!Array.isArray(chunk.transactions))throw new Error('The testnet transaction index returned no transaction details. Please retry.');
     txs.push(...chunk.transactions.filter((t):t is FullTx=>!!t));
   }
   const events:VaultEvent[]=[];
