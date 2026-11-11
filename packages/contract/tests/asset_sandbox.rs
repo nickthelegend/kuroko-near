@@ -52,7 +52,15 @@ async fn shareholder_vote_lifecycle_locks_transfers_then_updates_rules()->Result
  let rejected=alice.call(token.id(),"ft_transfer_call").args_json(json!({"receiver_id":vault.id(),"amount":"100000","memo":null,"msg":""})).deposit(NearToken::from_yoctonear(1)).gas(Gas::from_tgas(100)).transact().await?;
  assert_eq!(rejected.json::<String>()?,"0","a locked deposit is refunded, not accepted");
  let balance:Value=token.view("ft_balance_of").args_json(json!({"account_id":alice.id()})).await?.json()?;assert_eq!(balance,"1000000");
- worker.fast_forward(100000).await?;
+ // Expire only this sandbox proposal with the sandbox state API. Crossing 100,000
+ // blocks would unnecessarily process many epochs on a shared, memory-limited machine.
+ let proposals:Value=vault.view("proposals").await?.json()?;
+ let close=proposals[0]["closes_at_ms"].as_u64().unwrap().to_le_bytes();
+ let mut state=vault.view_state().await?.remove(b"STATE".as_slice()).expect("contract state");
+ let positions:Vec<usize>=state.windows(8).enumerate().filter_map(|(i,b)|if b==close{Some(i)}else{None}).collect();
+ assert_eq!(positions.len(),1,"the proposal expiry must have one unambiguous encoding");
+ state[positions[0]..positions[0]+8].copy_from_slice(&0u64.to_le_bytes());
+ worker.patch_state(vault.id(),b"STATE",&state).await?;
  alice.call(vault.id(),"execute").args_json(json!({"id":0})).transact().await?.into_result()?;
  let state:Value=vault.view("state").await?.json()?;assert_eq!(state["constitution"]["min_spread_bps"],40);
  let proposals:Value=vault.view("proposals").await?.json()?;assert_eq!(proposals[0]["executed"],true);
