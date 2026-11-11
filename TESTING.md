@@ -1,6 +1,40 @@
+# Real browser QA signer — 2026-11-11
+
+Run from the repository root:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm test:e2e
+```
+
+Prerequisites: Node.js 22.12 or newer, pnpm 10.29.2, installed Google Chrome, the shared `withChromeLock` module at `/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/chrome-lock.mjs`, and the existing funded demo credential `.near-credentials/kuroko-lp-346fc6f5.testnet.json`. The credential stays private and is not included in Git. No wallet extension or human wallet approval is needed for this QA run.
+
+The runner first checks testnet NEAR, USDC, vault state and the remaining budget. Low balances, an open vote, a paused vault or insufficient budget stop it with a clear message before signing. It checks swap free before builds and waits two minutes below 500 MB. It selects a free port in 5300-5999, uses Playwright's installed Chrome channel under the shared lock, and closes every browser/server it starts.
+
+The runner builds two separate artifacts:
+
+- Ordinary production mode, deliberately with `VITE_QA_SIGNER=1` in the environment. Vite forces the flag to `0` in this mode. The runner verifies that neither a `qa-signer` chunk nor the `__KUROKO_QA`/`QA signer` markers are present.
+- QA mode with `VITE_QA_SIGNER=1` and `--mode qa`. Only this build includes the adapter. It uses the existing Connect/Deposit/Withdraw controls without a new screen or visual style.
+
+The secret is read in Node, passed directly to `page.addInitScript`, consumed by the QA adapter and kept in an in-memory key store. The runner does not save traces, videos, console text, storage state or the injected credential. It verifies that the injection global is removed and browser local/session storage stay empty. The signing account and vault must be named `.testnet` accounts; the sole RPC is `https://test.rpc.fastnear.com`. The token receiver is the recorded Circle testnet USDC contract. Mainnet RPCs and non-testnet signing accounts are refused.
+
+At **1440×900** and **375×812**, the test connects, deposits 0.01 USDC, waits for finality, checks the app's confirmation and exact explorer receipt, checks the updated position/history, withdraws the minted shares, checks the second final receipt and restored position, then disconnects. It also checks zero earned fees, overflow, raw error text, console errors, failed requests and HTTP errors. No receipt or balance is mocked.
+
+All hashes, final statuses, balances, screenshot paths and the shared gas budget are saved in [deployments/qa-browser-2026-11-11.json](deployments/qa-browser-2026-11-11.json); future runs use their UTC date. The **0.3 NEAR cap is cumulative within that date's ledger**, across viewports and runs. Reservations are saved before signing and remain charged if a submission is unresolved. A known finalized deposit from an interrupted run can resume through its position check and withdrawal without depositing twice; an unresolved submission stops for receipt inspection. Do not delete the ledger to bypass the cap.
+
+Screenshots and build/test logs live under `/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/`. See [FLOW-QA.md](FLOW-QA.md) for the real transaction links and before/after screenshots.
+
+`pnpm test` now passes **21 executable tests, 0 failed, 0 skipped**: SDK 5, solver 1, MCP 1, web 7, Rust unit 3, sandbox 4. The web tests include mainnet/budget rejection and duplicate-indexed-receipt regression cases. `VITE_QA_SIGNER=1 pnpm build` also passes. A manual production-bundle check is:
+
+```sh
+! rg -n 'qa-signer|__KUROKO_QA|QA signer' packages/web/dist
+```
+
+No matches are expected. Human Meteor approval in the ordinary production build remains the manual wallet-specific check; the QA signer verifies the app's real signing flow separately.
+
 # Full-flow QA — 2026-11-11
 
-`pnpm install --frozen-lockfile`, `pnpm test` and `pnpm build` passed during this QA. The current suite has **17 executable tests, 0 failed, 0 skipped**: SDK 5, solver 1, MCP 1, web receipt validation 3, Rust unit 3, sandbox 4. The older 13-test result below is historical.
+`pnpm install --frozen-lockfile`, `pnpm test` and `pnpm build` passed during this QA. That earlier suite had **17 executable tests, 0 failed, 0 skipped**: SDK 5, solver 1, MCP 1, web receipt validation 3, Rust unit 3, sandbox 4. The older 13-test result below is historical.
 
 New checks cover refunded deposits, failed withdrawal receipts, pending/incomplete wallet results, the shareholder proposal/vote/execute lifecycle, transfer locks during voting, and withdrawals while paused. The governance sandbox test expires its local proposal through the sandbox state API; it does not wait 24 hours or change a deployed contract. The local test token now returns the amount accepted by the receiver from its transfer resolver.
 
