@@ -114,7 +114,7 @@ function TradeCard({data,wallet,locked,myShares,unavailable}:{data:Data;wallet:W
     <form onSubmit={submit}>
       <label className="amount">
         <span className="amount-top"><span>{mode==='deposit'?'Amount':'Shares'}</span>
-          {wallet.account&&<span>{mode==='deposit'?'Balance':'You hold'} {max!=null?(mode==='deposit'?usdc(max):decimal(max,6,4)):'…'}{max&&max!=='0'&&<button type="button" className="max" onClick={()=>setAmount(decimal(max).replace(/,/g,''))}>Max</button>}</span>}
+          {wallet.account&&<span>{mode==='deposit'?'Balance':'You hold'} {max!=null?(mode==='deposit'?usdc(max):decimal(max,6,4)):'…'}{max&&max!=='0'&&<button type="button" className="max" aria-label={mode==='deposit'?'Use full USDC balance':'Use all shares'} onClick={()=>setAmount(decimal(max).replace(/,/g,''))}>Max</button>}</span>}
         </span>
         <span className="amount-box">
           <input inputMode="decimal" placeholder="0.00" value={amount} onChange={e=>{setAmount(e.target.value);setMsg(null);}} aria-label={mode==='deposit'?'USDC amount':'Shares to redeem'}/>
