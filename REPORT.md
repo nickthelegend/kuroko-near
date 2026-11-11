@@ -1,6 +1,6 @@
 # Kuroko build report — updated 2026-11-11
 
-This report reflects the deployment records and testing notes through Nov 10. The Nov 11 update corrects documentation; it does not claim a new deployment or test run.
+This report includes the Nov 11 full-flow QA. No contract was redeployed. The bounded testnet deposit/withdrawal round trip and browser evidence are recorded in [FLOW-QA.md](FLOW-QA.md).
 
 ## What works live
 
@@ -11,7 +11,7 @@ This report reflects the deployment records and testing notes through Nov 10. Th
 
 ## Test result
 
-The recorded `pnpm test` run passed: **13 executable tests, 0 failed, 0 skipped** (SDK 5, solver 1, MCP 1, contract unit 3, sandbox 3). Web TypeScript and production build passed. Nov 10 browser checks at 1440 and 375 px also passed with no page errors or horizontal overflow. Meteor connection and popup errors were checked; a full browser sign-in and deposit remain unverified. See [TESTING.md](TESTING.md).
+The Nov 11 `pnpm test` run passed: **17 executable tests, 0 failed, 0 skipped** (SDK 5, solver 1, MCP 1, web receipt validation 3, contract unit 3, sandbox 4). Web TypeScript and production build passed. Nov 10 browser checks at 1440 and 375 px also passed with no page errors or horizontal overflow. Meteor connection and popup errors were checked; a full browser sign-in and deposit remain unverified. See [TESTING.md](TESTING.md).
 
 ## Blocked
 

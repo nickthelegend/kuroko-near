@@ -1,3 +1,13 @@
+# Full-flow QA — 2026-11-11
+
+`pnpm install --frozen-lockfile`, `pnpm test` and `pnpm build` passed during this QA. The current suite has **17 executable tests, 0 failed, 0 skipped**: SDK 5, solver 1, MCP 1, web receipt validation 3, Rust unit 3, sandbox 4. The older 13-test result below is historical.
+
+New checks cover refunded deposits, failed withdrawal receipts, pending/incomplete wallet results, the shareholder proposal/vote/execute lifecycle, transfer locks during voting, and withdrawals while paused. The governance sandbox test expires its local proposal through the sandbox state API; it does not wait 24 hours or change a deployed contract. The local test token now returns the amount accepted by the receiver from its transfer resolver.
+
+The bounded live testnet script deposited and withdrew 0.01 Circle testnet USDC, reconciled balances, and spent 0.001262360967591900000001 NEAR in gas and attached deposit. No mainnet action was taken. The vault balance remains 0.30 USDC, and the depositor holds 0.30 shares after the round trip.
+
+See [FLOW-QA.md](FLOW-QA.md) for the two-width Chrome walkthrough, before/after screenshots, injected failure-state coverage, transaction links, and the human Meteor sign-in boundary.
+
 # Testing — 2026-11-09
 
 Command run from the repository root:
