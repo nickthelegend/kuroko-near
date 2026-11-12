@@ -1,5 +1,7 @@
 # Real browser QA signer — 2026-11-11
 
+Screenshots were captured locally during QA and are not committed.
+
 Run from the repository root:
 
 ```sh
@@ -7,7 +9,7 @@ pnpm install --frozen-lockfile
 pnpm test:e2e
 ```
 
-Prerequisites: Node.js 22.12 or newer, pnpm 10.29.2, installed Google Chrome, the shared `withChromeLock` module at `/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/chrome-lock.mjs`, and the existing funded demo credential `.near-credentials/kuroko-lp-346fc6f5.testnet.json`. The credential stays private and is not included in Git. No wallet extension or human wallet approval is needed for this QA run.
+Prerequisites: Node.js 22.12 or newer, pnpm 10.29.2, installed Google Chrome, the shared `withChromeLock` module at `chrome-lock.mjs`, and the existing funded demo credential `.near-credentials/kuroko-lp-346fc6f5.testnet.json`. The credential stays private and is not included in Git. No wallet extension or human wallet approval is needed for this QA run.
 
 The runner first checks testnet NEAR, USDC, vault state and the remaining budget. Low balances, an open vote, a paused vault or insufficient budget stop it with a clear message before signing. It checks swap free before builds and waits two minutes below 500 MB. It selects a free port in 5300-5999, uses Playwright's installed Chrome channel under the shared lock, and closes every browser/server it starts.
 
@@ -22,7 +24,7 @@ At **1440×900** and **375×812**, the test connects, deposits 0.01 USDC, waits 
 
 All hashes, final statuses, balances, screenshot paths and the shared gas budget are saved in [deployments/qa-browser-2026-11-11.json](deployments/qa-browser-2026-11-11.json); future runs use their UTC date. The **0.3 NEAR cap is cumulative within that date's ledger**, across viewports and runs. Reservations are saved before signing and remain charged if a submission is unresolved. A known finalized deposit from an interrupted run can resume through its position check and withdrawal without depositing twice; an unresolved submission stops for receipt inspection. Do not delete the ledger to bypass the cap.
 
-Screenshots and build/test logs live under `/private/tmp/claude-501/-Volumes-Extreme-SSD-Projects-grokbot/0f121b7c-0081-4ec0-81a9-0ccb4f7f8b48/scratchpad/flow-qa/kuroko/qa-signer/`. See [FLOW-QA.md](FLOW-QA.md) for the real transaction links and before/after screenshots.
+Screenshots and build/test logs live under `qa-signer`. See [FLOW-QA.md](FLOW-QA.md) for the real transaction links and before/after screenshots.
 
 `pnpm test` now passes **21 executable tests, 0 failed, 0 skipped**: SDK 5, solver 1, MCP 1, web 7, Rust unit 3, sandbox 4. The web tests include mainnet/budget rejection and duplicate-indexed-receipt regression cases. `VITE_QA_SIGNER=1 pnpm build` also passes. A manual production-bundle check is:
 
@@ -90,3 +92,7 @@ Checked against `vite build && vite preview` in headless Chrome at 1440×900 and
 
 Not done: a full Meteor sign-in, a browser deposit and its approval. Meteor's site sits behind Cloudflare, which shows headless Chrome "Sorry, you have been blocked", and signing in needs a person with a Meteor testnet account (see BLOCKED.md).
 
+
+## R3 documentation check — 2026-11-12
+
+Checked tracked Markdown for absolute local paths; the required grep returned no matches after cleanup. Historical result rows, status words and transaction hashes are unchanged. Runtime tests executed: 0. New transactions: 0. NEAR spent: 0.
