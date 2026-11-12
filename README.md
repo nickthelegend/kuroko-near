@@ -6,6 +6,8 @@ People who want to pool money for swap market making need clear rules for how th
 
 ## Try it
 
+No swap fills, quotes, fees or APY exist yet: relay access is **BLOCKED** because `PARTNER_JWT` is absent (see [BLOCKED.md](BLOCKED.md)).
+
 There is no hosted demo recorded in this repo. Run these steps from the repository root with Node.js 22.12 or newer and pnpm 10.29.2 (QA used Node.js 26.5.0). The read-only demo needs no wallet, key or relay access. It needs internet access to NEAR testnet RPC and FastNEAR's transaction index.
 
 1. Run `pnpm install --frozen-lockfile` - see the workspace dependencies install from the lockfile.

@@ -12,3 +12,7 @@
 | Public repository and hackathon submission | This repository is local only; human submission fields are missing. | Nick makes it public before **2026-11-14 23:59 UTC**, provides the fields in `HACKATHON_SUBMISSION_FORM.md`, records and publishes the demo post, and explicitly confirms the final submission payload. |
 
 The absence of a JWT is an access block, not a reason to invent relay data. No real quotes, wins, fills, spread revenue, or mainnet inventory are claimed.
+
+## R3 documentation check — 2026-11-12
+
+Removed absolute local evidence references from tracked Markdown and checked that the README states the missing fills, quotes, fees and APY within its first 15 lines. Relay access remains blocked by missing `PARTNER_JWT`; no new solver activity is claimed. Runtime tests executed: 0. New transactions: 0. NEAR spent: 0. No deployment evidence was changed.
