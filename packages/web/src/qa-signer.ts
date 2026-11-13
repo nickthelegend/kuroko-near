@@ -2,7 +2,7 @@
 import {connect,keyStores,KeyPair,transactions,providers} from 'near-api-js';
 import type {AppWallet,WalletLayer} from './wallet-layer';
 import {vaultId,usdcId,liveRecord} from './rpc';
-import {checkQaNetwork,qaReservation,QA_RPC,QA_CAP} from './qa-signer-policy';
+import {checkQaNetwork,qaReservation,QA_RPCS,QA_CAP} from './qa-signer-policy';
 import {VAULTS} from './vaults';
 
 type Input={accountId:string;secretKey:string;rpcUrl:string};
@@ -19,7 +19,8 @@ export async function setupQaSigner():Promise<WalletLayer>{
   delete window.__KUROKO_QA_SIGNER_INPUT;
   if(!input||!window.__KUROKO_QA_RESERVE||!window.__KUROKO_QA_RECEIPT)throw Error('QA signer requires the end-to-end test runner.');
   checkQaNetwork(input.accountId,input.rpcUrl,vaultId);
-  if(input.accountId!==liveRecord.lp||(import.meta.env.VITE_TESTNET_RPC_URL||QA_RPC)!==QA_RPC)throw Error('QA signer only supports the recorded testnet demo account.');
+  const QA_RPC=input.rpcUrl;
+  if(input.accountId!==liveRecord.lp||!QA_RPCS.includes(QA_RPC))throw Error('QA signer only supports the recorded testnet demo account.');
   const accountId=input.accountId;
   const keyStore=new keyStores.InMemoryKeyStore();
   try{if(!/^ed25519:[1-9A-HJ-NP-Za-km-z]+$/.test(input.secretKey))throw Error('format');await keyStore.setKey('testnet',accountId,KeyPair.fromString(input.secretKey as `ed25519:${string}`));}

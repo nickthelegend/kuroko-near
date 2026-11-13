@@ -73,7 +73,7 @@ function VoteCard({p,v}:{p:Proposal;v:VaultLive}){
   return <li className={`vote ${open?'vote-open':''}`}>
     <div className="vote-top">
       <span><b>{v.meta.name}</b><span className="muted"> · proposal {p.id}</span></span>
-      <span className={`status status-${p.executed?'ok':open?'warn':'off'}`}>{p.executed?'Executed':open?<><Pulse tone="warn"/>Closes in <span className="mono">{left}</span></>:yes>50?'Passed, ready to execute':'Did not pass'}</span>
+      <span className={`status status-${p.executed?'ok':open?'warn':'off'}`}>{p.executed?'Executed':open?<><Pulse tone="warn"/>Closes in&nbsp;<span className="mono">{left}</span></>:yes>50?'Passed, ready to execute':'Did not pass'}</span>
     </div>
     <div className="vote-changes">
       <span className={diff(c.allowed_pairs.join(),cur?.allowed_pairs.join())?'chg':''}>Pairs: {c.allowed_pairs.map(pairLabel).join(', ')}</span>

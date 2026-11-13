@@ -99,7 +99,7 @@ export function Heartbeat(){
   const {head}=useStore();const now=useNow(1000);
   const h=val(head);const stale=!h||now-h.at>15000;
   return <span className="beat" title="NEAR testnet, latest final block">
-    <Pulse tone={head.state==='error'&&!h?'bad':stale?'warn':'ok'}/>
+    <Pulse tone={stale?'warn':'ok'}/>
     <span className="beat-net">Testnet</span>
     <span className="beat-h mono">{h?`#${h.height.toLocaleString('en-US')}`:'…'}</span>
   </span>;

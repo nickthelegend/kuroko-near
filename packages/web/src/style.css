@@ -148,7 +148,7 @@ button.kpi-sub{text-align:left}
 
 /* Charts */
 .chart{position:relative;width:100%;min-height:120px}
-.chart svg{display:block;overflow:visible;touch-action:pan-y}
+.chart svg{display:block;overflow:visible;touch-action:pan-y;max-width:100%;height:auto}
 .chart .grid{stroke:var(--line-2);stroke-width:1}
 .chart .tick{fill:var(--ink-3);font-size:11px;font-family:var(--sans)}
 .chart .line{stroke:var(--accent);stroke-width:2.2;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.4s cubic-bezier(.3,.7,.2,1) forwards}
@@ -494,12 +494,12 @@ a.prow:hover{background:var(--hover)}
   .tabbar a[aria-current=page] .icon{color:var(--accent)}
   .app{padding-bottom:72px}
   .app-main{padding-top:20px;padding-bottom:48px}
-  .vault-grid{grid-template-columns:1fr}
+  .vault-grid{grid-template-columns:minmax(0,1fr)}
   .vault-side{position:static;order:-1}
   .vault-main{display:contents}
   .vault-page .kpis{order:-2}
   .mobile-cta{display:none}
-  .split,.two-col,.relay-grid,.rules-grid{grid-template-columns:1fr}
+  .split,.two-col,.relay-grid,.rules-grid{grid-template-columns:minmax(0,1fr)}
   .blocked-card{grid-template-columns:1fr}.blocked-card>.art{min-height:200px}
   .summary{grid-template-columns:1fr}
   .summary-art{min-height:160px;order:-1}
@@ -550,3 +550,4 @@ a.prow:hover{background:var(--hover)}
   .chart .line{stroke-dashoffset:0}.chart .area{opacity:1}
   html{scroll-behavior:auto}
 }
+.relay-grid>.card:last-child{grid-column:1/-1}

@@ -14,9 +14,14 @@ export type Point={at:number;cash:bigint;shares:bigint;price:bigint};
 export type History={events:VaultEvent[];points:Point[];cash:bigint;shares:bigint;depositors:Set<string>;txCount:number};
 
 async function post<T>(path:string,body:object):Promise<T>{
-  let r:Response;
-  try{r=await fetch(`${INDEX}/${path}`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)});}
-  catch{throw new Error('Testnet transaction history is unreachable. It will retry automatically.');}
+  // The public index rate-limits per IP; a limited reply carries no CORS header, so it surfaces as a network error.
+  let r:Response|undefined;
+  for(let attempt=0;attempt<4;attempt++){
+    try{r=await fetch(`${INDEX}/${path}`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)});if(r.status!==429&&r.status<500)break;}
+    catch{r=undefined;}
+    await new Promise(res=>setTimeout(res,700*(attempt+1)+Math.random()*400));
+  }
+  if(!r)throw new Error('Testnet transaction history is unreachable. It will retry automatically.');
   if(!r.ok)throw new Error(`Testnet transaction history is unavailable (HTTP ${r.status}). It will retry automatically.`);
   try{return await r.json() as T;}catch{throw new Error('The testnet transaction index returned unreadable data. Please retry.');}
 }

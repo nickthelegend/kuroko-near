@@ -16,10 +16,10 @@ export type TapeEntry={at:string;mode:'listen';request:{quote_id:string;defuse_a
 export type SolverState={mode:'listen';startedAt:string;requestsSeen:number;wouldQuote:number;quoted:number;won:number;spreadEarned:string;inventory:Record<string,string>;lastError:string|null;tape:TapeEntry[]};
 
 /**
- * Reads go to two public NEAR testnet RPCs in turn (FastNEAR first), failing over on a network error or a rate limit,
+ * Reads go to public NEAR testnet RPCs in turn (FastNEAR, its archival node, then dRPC), failing over on a network error or a rate limit,
  * so live polling from many tabs does not stall on one provider's per-IP limit. Both serve the same chain.
  */
-const RPCS=[rpcUrl,...(rpcUrl==='https://test.rpc.fastnear.com'?['https://rpc.testnet.near.org']:[])];
+const RPCS=[...new Set([rpcUrl,'https://test.rpc.fastnear.com','https://archival-rpc.testnet.fastnear.com','https://near-testnet.drpc.org'])];
 let rr=0;
 export async function rpcPost<T>(body:object):Promise<T>{
   let last='';
