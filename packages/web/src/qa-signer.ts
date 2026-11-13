@@ -1,5 +1,5 @@
 /** QA-only browser signer. Never stores credentials in browser storage or a build artifact. */
-import {connect,keyStores,KeyPair,transactions,providers} from 'near-api-js';
+import {connect,keyStores,KeyPair,transactions,providers,utils} from 'near-api-js';
 import type {AppWallet,WalletLayer} from './wallet-layer';
 import {vaultId,usdcId,liveRecord} from './rpc';
 import {checkQaNetwork,qaReservation,QA_RPCS,QA_READ_RPCS,QA_CAP} from './qa-signer-policy';
@@ -49,10 +49,21 @@ export async function setupQaSigner():Promise<WalletLayer>{
       if(usedReservation+reserved>QA_CAP)throw Error('QA signer reached the 0.3 NEAR session cap.');
       const ticket=await window.__KUROKO_QA_RESERVE!({receiverId:receiverId!,methods:calls.map(a=>a.functionCall!.methodName),reservedYocto:reserved.toString()});
       usedReservation+=reserved;
-      let sent;
-      try{sent=await account.signAndSendTransaction({receiverId:receiverId!,actions:calls,returnError:true});}
-      catch{throw Error('QA signer submission did not return a receipt. The budget remains reserved; do not retry blindly.');}
-      const hash=sent.transaction.hash;
+      // Sign once, then broadcast the same signed bytes until an approved RPC accepts them. Re-sending an identical
+      // signed transaction cannot execute twice (same hash, same nonce), so a rate-limited broadcast is safe to retry.
+      let signed;
+      for(let i=0;i<5&&!signed;i++){
+        try{signed=await (account as unknown as {signTransaction:(r:string,a:typeof calls)=>Promise<[Uint8Array,Parameters<providers.JsonRpcProvider['sendTransactionAsync']>[0]]>}).signTransaction(receiverId!,calls);}
+        catch{await new Promise(r=>setTimeout(r,1500+700*i));}
+      }
+      if(!signed)throw Error('QA signer could not sign this transaction (nonce or access key lookup failed). Nothing was sent.');
+      const hash=utils.serialize.base_encode(signed[0]);
+      let accepted=false;
+      for(let i=0;i<10&&!accepted;i++){
+        try{await new providers.JsonRpcProvider({url:QA_RPCS[i%QA_RPCS.length]}).sendTransactionAsync(signed[1]);accepted=true;}
+        catch{await new Promise(r=>setTimeout(r,1500+500*i));}
+      }
+      if(!accepted)throw Error('QA signer submission did not return a receipt. The budget remains reserved; do not retry blindly.');
       await window.__KUROKO_QA_RECEIPT!(ticket,hash);
       // near-api-js 5 submits optimistically. Do not let the app confirm until finality.
       // Public testnet RPCs rate-limit per IP; poll the approved endpoints in turn until the transaction is final.
