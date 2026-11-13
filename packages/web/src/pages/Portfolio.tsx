@@ -40,7 +40,7 @@ export default function Portfolio(){
       </section>
       <section className="block">
         <div className="block-head"><h2>Positions</h2></div>
-        {rows.state==='error'&&!positions?<Empty art="relay" tone="err" title="Positions could not load">{rows.state==='error'?rows.message:''}</Empty>
+        {rows.state==='error'&&!positions?<Empty art="curtain" tone="err" title="Positions could not load">{rows.state==='error'?rows.message:''}</Empty>
         :!positions?<Skel h={120} r={16}/>
         :!positions.length?<div className="card"><Empty art="empty" title="No vault shares" action={<Link to="/vaults" className="btn btn-accent">Browse vaults</Link>}>This account holds no Kuroko shares right now.</Empty></div>
         :<div className="ptable">

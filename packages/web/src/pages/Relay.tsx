@@ -96,7 +96,7 @@ export default function Relay(){
           </dl>
           <QuoteSpark qs={quotes}/>
           <p className="fine">A dry-run 1Click quote on NEAR mainnet: real solvers compete, but no deposit address is made and nothing moves. Kuroko’s line is arithmetic from the reference price and the vault’s rule, not a sent quote. The spread includes 1Click’s own fee.</p>
-        </>:quoteError?<Empty art="relay" tone="err" title="Market quote unavailable">{quoteError}</Empty>:<Skel h={220} r={16}/>}
+        </>:quoteError?<Empty art="curtain" tone="err" title="Market quote unavailable">{quoteError}</Empty>:<Skel h={220} r={16}/>}
       </section>
 
       <section className="card">

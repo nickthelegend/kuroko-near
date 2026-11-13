@@ -53,14 +53,14 @@ function VaultBody({v}:{v:VaultLive}){
           <div className="kpi"><span className="label">APY</span><span className="kpi-num apy-none">—</span><span className="kpi-sub">No fills yet</span></div>
           <div className="kpi"><span className="label">Your position</span>{!w.account?<><span className="kpi-num num-empty">—</span><button type="button" className="kpi-sub linkish" onClick={()=>void w.connect()} disabled={!w.ready}>Connect wallet</button></>:myValue==null?<Skel h={40} w={110}/>:<><Num value={myValue} dp={2} unit="USDC" className="kpi-num"/><span className="kpi-sub">{decimal(myShares!,6,4)} shares</span></>}</div>
         </section>
-        {v.state.state==='error'&&!s&&<Empty art="relay" tone="err" title="Vault state unavailable">{v.state.message}</Empty>}
+        {v.state.state==='error'&&!s&&<Empty art="curtain" tone="err" title="Vault state unavailable">{v.state.message}</Empty>}
 
         <section className="card chart-card">
           <div className="card-head">
             <div><span className="label">{metric==='cash'?'Deposits':'Share price'}</span>{s&&<div className="chart-now">{metric==='cash'?<Num value={usd(s.usdc_balance)} dp={2} unit="USDC"/>:<Num value={priceNum(s)} dp={6} strong={2} unit="USDC"/>}</div>}</div>
             <div className="seg" role="group" aria-label="Chart"><button type="button" aria-pressed={metric==='cash'} onClick={()=>setMetric('cash')}>Deposits</button><button type="button" aria-pressed={metric==='price'} onClick={()=>setMetric('price')}>Share price</button></div>
           </div>
-          {h?<StepChart points={metric==='cash'?cashPoints(h):pricePoints(h)} dp={metric==='cash'?2:4} floor0={metric==='cash'} empty={<Empty art="empty" title="No deposits yet">The first deposit starts this chart.</Empty>}/>:v.history.state==='error'&&!h?<Empty art="relay" tone="err" title="History unavailable">{v.history.message}</Empty>:<Skel h={260} r={16}/>}
+          {h?<StepChart points={metric==='cash'?cashPoints(h):pricePoints(h)} dp={metric==='cash'?2:4} floor0={metric==='cash'} empty={<Empty art="empty" title="No deposits yet">The first deposit starts this chart.</Empty>}/>:v.history.state==='error'&&!h?<Empty art="curtain" tone="err" title="History unavailable">{v.history.message}</Empty>:<Skel h={260} r={16}/>}
           <p className="fine">Rebuilt from {h?h.events.length:'…'} on-chain USDC transfers{metric==='price'?'. The share price stays at 1.00 until the vault earns from a fill.':'.'}</p>
         </section>
 

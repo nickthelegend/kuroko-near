@@ -22,7 +22,7 @@ export function Feed({limit,compact=false,filter}:{limit?:number;compact?:boolea
   },[feed,feedReady]);
   const rows=(filter?feed.filter(filter):feed).slice(0,limit??Infinity);
   if(!feedReady&&!feed.length)return feedError
-    ?<Empty art="relay" tone="err" title="Activity could not load">{feedError}</Empty>
+    ?<Empty art="curtain" tone="err" title="Activity could not load">{feedError}</Empty>
     :<div className="feed" aria-busy="true">{[0,1,2,3].map(i=><div key={i} className="feed-row"><Skel h={36} w={36} r={12}/><Skel w="60%"/></div>)}</div>;
   if(!rows.length)return <Empty art="empty" title="No activity here yet">The first deposit will appear here within seconds, with its transaction.</Empty>;
   return <ol className={`feed ${compact?'feed-compact':''}`}>
