@@ -184,3 +184,10 @@ export const valueOf=<T,>(l:Live<T>):T|undefined=>'value' in l?l.value:undefined
 /** Re-renders every few seconds so "x s ago" labels stay true. */
 export function useNow(every=1000){const [now,setNow]=useState(Date.now());useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),every);return()=>clearInterval(t);},[every]);return now;}
 export function agoShort(ms:number,now=Date.now()){const s=Math.max(0,Math.round((now-ms)/1000));if(s<5)return 'just now';if(s<60)return `${s}s ago`;const m=Math.floor(s/60);if(m<60)return `${m}m ago`;const h=Math.floor(m/60);if(h<48)return `${h}h ago`;return `${Math.floor(h/24)}d ago`;}
+
+/** "Read 3s ago" with a pulse: how fresh a polled chain value is. */
+export function Fresh<T>({live,label='Read'}:{live:Live<T>;label?:string}){
+  const now=useNow(1000);
+  const at='at' in live?live.at:null;
+  return <span className="fresh-chip"><Pulse tone={live.state==='error'?'warn':at?'ok':'off'}/>{at?`${label} ${agoShort(at,now)}`:live.state==='error'?'Retrying':'Reading chain…'}</span>;
+}

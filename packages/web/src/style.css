@@ -551,3 +551,5 @@ a.prow:hover{background:var(--hover)}
   html{scroll-behavior:auto}
 }
 .relay-grid>.card:last-child{grid-column:1/-1}
+.fresh-chip{display:inline-flex;align-items:center;font-size:13px;color:var(--ink-2);white-space:nowrap}
+.block-meta{display:inline-flex;gap:14px;align-items:center}

@@ -4,7 +4,7 @@ import {useStore,val,openVote,type VaultLive} from '../store';
 import {vaultBySlug} from '../vaults';
 import {cashPoints,pricePoints,priceNum,usd,bps,statusOf,sharesFor,usdcFor} from '../derive';
 import {decimal,nearblocksAccount,rawUnits,short,usdc,usdcId,view,when} from '../rpc';
-import {Art,Copy,Empty,Icon,Num,Pulse,Skel,StepChart,TxLink,agoShort,useLive,useNow,valueOf} from '../ui';
+import {Art,Copy,Empty,Fresh,Icon,Num,Pulse,Skel,StepChart,TxLink,agoShort,useLive,useNow,valueOf} from '../ui';
 import {Pair,Token} from '../tokens';
 import {Feed} from './Activity';
 import {TradeCheck} from './Governance';
@@ -39,6 +39,7 @@ function VaultBody({v}:{v:VaultLive}){
           <span className={`status status-${st.tone}`}><Pulse tone={st.tone}/>{st.label}</span>
           <span className="nowrap"><a className="mono" href={nearblocksAccount(v.meta.id)} target="_blank" rel="noreferrer">{short(v.meta.id,14,8)}</a><Copy value={v.meta.id}/></span>
           <span className="nowrap muted">Circle testnet USDC</span>
+          <Fresh live={v.state}/>
         </p>
         <p className="vhead-blurb">{v.meta.blurb}</p>
       </div>

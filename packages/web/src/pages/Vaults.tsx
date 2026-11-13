@@ -2,7 +2,7 @@ import {Link,go} from '../App';
 import {useStore,val,openVote,type VaultLive} from '../store';
 import {cashPoints,priceNum,totalPoints,usd,bps,statusOf,pairList} from '../derive';
 import {usdc} from '../rpc';
-import {Art,Icon,Num,Pulse,Skel,Spark,StepChart,agoShort,useNow} from '../ui';
+import {Art,Fresh,Icon,Num,Pulse,Skel,Spark,StepChart,agoShort,useNow} from '../ui';
 import {Pair,Token} from '../tokens';
 import {Feed} from './Activity';
 import {RelayMini} from './Relay';
@@ -33,7 +33,7 @@ export default function VaultsPage(){
     </section>
 
     <section className="block">
-      <div className="block-head"><h2>Vaults</h2><span className="muted">All on NEAR testnet · Circle testnet USDC</span></div>
+      <div className="block-head"><h2>Vaults</h2><span className="block-meta"><span className="muted hide-sm">All on NEAR testnet · Circle testnet USDC</span><Fresh live={vaults[0].state}/></span></div>
       <div className="vtable" role="table" aria-label="Vaults">
         <div className="vrow vrow-head" role="row">
           <span role="columnheader">Vault</span><span role="columnheader" className="r">Deposits</span><span role="columnheader" className="r hide-md">Share price</span>
