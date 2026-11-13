@@ -15,19 +15,33 @@ export type Proposal={id:number;constitution:Constitution;yes:string;no:string;s
 export type TapeEntry={at:string;mode:'listen';request:{quote_id:string;defuse_asset_identifier_in:string;defuse_asset_identifier_out:string;exact_amount_in?:string;exact_amount_out?:string};result:Record<string,unknown>};
 export type SolverState={mode:'listen';startedAt:string;requestsSeen:number;wouldQuote:number;quoted:number;won:number;spreadEarned:string;inventory:Record<string,string>;lastError:string|null;tape:TapeEntry[]};
 
+/**
+ * Reads go to two public NEAR testnet RPCs in turn (FastNEAR first), failing over on a network error or a rate limit,
+ * so live polling from many tabs does not stall on one provider's per-IP limit. Both serve the same chain.
+ */
+const RPCS=[rpcUrl,...(rpcUrl==='https://test.rpc.fastnear.com'?['https://rpc.testnet.near.org']:[])];
+let rr=0;
+export async function rpcPost<T>(body:object):Promise<T>{
+  let last='';
+  for(let i=0;i<RPCS.length*2;i++){
+    const url=RPCS[(rr+i)%RPCS.length];
+    try{
+      const r=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(12000)});
+      if(r.status===429||r.status>=500){last=`HTTP ${r.status}`;continue;}
+      if(!r.ok)throw new Error(`NEAR testnet RPC HTTP ${r.status}`);
+      rr=(rr+1)%RPCS.length;
+      return await r.json() as T;
+    }catch(e){last=(e as Error).message;if(i>=RPCS.length)await new Promise(r=>setTimeout(r,400));}
+  }
+  throw new Error(`NEAR testnet RPC is unreachable (${last||'no answer'}). Retrying on the next refresh.`);
+}
 export async function view<T>(account:string,method:string,args:object={}):Promise<T>{
   const bytes=new TextEncoder().encode(JSON.stringify(args));
   const binary=Array.from(bytes,b=>String.fromCharCode(b)).join('');
-  const body={jsonrpc:'2.0',id:'kuroko-web',method:'query',params:{request_type:'call_function',finality:'final',account_id:account,method_name:method,args_base64:btoa(binary)}};
-  const post=()=>fetch(rpcUrl,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)});
-  let response:Response;
-  try{response=await post();}
-  catch{await new Promise(r=>setTimeout(r,900));try{response=await post();}catch{throw new Error(`NEAR testnet RPC is unreachable at ${new URL(rpcUrl).host}. Retrying on the next refresh.`);}}
-  if(!response.ok)throw new Error(`NEAR testnet RPC HTTP ${response.status}`);
+  const json=await rpcPost<{error?:unknown;result?:{result?:number[]}}>({jsonrpc:'2.0',id:'kuroko-web',method:'query',params:{request_type:'call_function',finality:'final',account_id:account,method_name:method,args_base64:btoa(binary)}});
   try{
-    const json=await response.json();
     if(json.error||!Array.isArray(json.result?.result))throw new Error('unavailable');
-    return JSON.parse(new TextDecoder().decode(new Uint8Array(json.result.result))) as T;
+    return JSON.parse(new TextDecoder().decode(new Uint8Array(json.result!.result!))) as T;
   }catch{throw new Error('NEAR testnet could not read this contract. Please retry; the page also refreshes automatically.');}
 }
 export const loadVault=()=>view<VaultState>(vaultId,'state');
@@ -53,7 +67,10 @@ export function when(ms:number){const d=new Date(ms);const sameYear=d.getFullYea
 export const short=(value:string,head=10,tail=6)=>value.length>head+tail+1?`${value.slice(0,head)}…${value.slice(-tail)}`:value;
 /** Share price in USDC, 6 places, or the 1.000000 genesis price when nothing is deposited. */
 export function sharePrice(cash:string|bigint,shares:string|bigint){const s=BigInt(shares);if(s===0n)return 1_000_000n;return BigInt(cash)*1_000_000n/s;}
-const TOKEN_NAMES:Record<string,string>={[live.usdc]:'USDC','usdc.testnet':'USDC','wrap.testnet':'wNEAR','wrap.near':'wNEAR'};
+const TOKEN_NAMES:Record<string,string>={[live.usdc]:'USDC','usdc.testnet':'USDC','wrap.testnet':'wNEAR','wrap.near':'wNEAR','eth.fakes.testnet':'ETH','aurora.fakes.testnet':'AURORA','usdt.fakes.testnet':'USDT','usdc.fakes.testnet':'USDC.e'};
 export const tokenName=(id:string)=>{const bare=id.replace(/^nep141:/,'');return TOKEN_NAMES[bare]||bare.replace(/\.testnet$|\.near$/,'').toUpperCase();};
 export const pairLabel=(pair:string)=>pair.split('/').map(tokenName).join(' ↔ ');
 export function navigate(path:string){if(location.pathname+location.search!==path){history.pushState(null,'',path);dispatchEvent(new PopStateEvent('popstate'));}scrollTo({top:0});}
+
+/** A readable account name: drops .testnet and trims long names. */
+export const acctName=(id:string)=>{const n=id.replace(/\.testnet$/,'');return n.length>18?`${n.slice(0,16)}…`:n;};

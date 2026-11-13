@@ -7,6 +7,7 @@ import {uniqueReceipts,type FullTx} from './history-receipts';
  * deposit and withdrawal with its amount and block time. Nothing here is stored or typed by hand.
  */
 const INDEX='https://tx.test.fastnear.com/v0';
+const txCache=new Map<string,FullTx>();
 
 export type VaultEvent={hash:string;at:number;kind:'deposit'|'withdrawal'|'out';account:string;amount:bigint;shares:bigint};
 export type Point={at:number;cash:bigint;shares:bigint;price:bigint};
@@ -32,12 +33,16 @@ export async function loadHistory(vault=vaultId,usdc=usdcId):Promise<History>{
   const list=await post<{account_txs:{transaction_hash:string;tx_block_height:number}[]}>('account',{account_id:vault});
   if(!Array.isArray(list.account_txs))throw new Error('The testnet transaction index returned no transaction list. Please retry.');
   const hashes=[...new Set(list.account_txs.map(t=>t.transaction_hash))];
-  const txs:FullTx[]=[];
-  for(let i=0;i<hashes.length;i+=20){
-    const chunk=await post<{transactions:(FullTx|null)[]}>('transactions',{tx_hashes:hashes.slice(i,i+20)});
+  const fresh=new Map<string,FullTx>();
+  // Finalised transactions never change, so their details are fetched once per page load.
+  const missing=hashes.filter(h=>!txCache.has(h));
+  for(let i=0;i<missing.length;i+=20){
+    const chunk=await post<{transactions:(FullTx|null)[]}>('transactions',{tx_hashes:missing.slice(i,i+20)});
     if(!Array.isArray(chunk.transactions))throw new Error('The testnet transaction index returned no transaction details. Please retry.');
-    txs.push(...chunk.transactions.filter((t):t is FullTx=>!!t));
+    const settled=Date.now()-120_000;
+    for(const t of chunk.transactions){if(t&&t.receipts.length&&t.receipts.every(r=>r.receipt.block_timestamp/1e6<settled))txCache.set(t.transaction.hash,t);else if(t)fresh.set(t.transaction.hash,t);}
   }
+  const txs:FullTx[]=hashes.map(h=>txCache.get(h)??fresh.get(h)).filter((t):t is FullTx=>!!t);
   const events:VaultEvent[]=[];
   for(const {tx,receipt:r} of uniqueReceipts(txs)){
       if(r.receipt.receiver_id!==usdc)continue;

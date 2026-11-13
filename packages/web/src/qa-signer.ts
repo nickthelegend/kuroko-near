@@ -3,6 +3,7 @@ import {connect,keyStores,KeyPair,transactions,providers} from 'near-api-js';
 import type {AppWallet,WalletLayer} from './wallet-layer';
 import {vaultId,usdcId,liveRecord} from './rpc';
 import {checkQaNetwork,qaReservation,QA_RPC,QA_CAP} from './qa-signer-policy';
+import {VAULTS} from './vaults';
 
 type Input={accountId:string;secretKey:string;rpcUrl:string};
 type Reservation={receiverId:string;methods:string[];reservedYocto:string};
@@ -31,7 +32,7 @@ export async function setupQaSigner():Promise<WalletLayer>{
   const getAccounts=async()=>connected?[{accountId}]:[];
   const signAndSendTransaction:AppWallet['signAndSendTransaction']=async({receiverId,actions,signerId})=>{
     if(!connected||pending)throw Error('Connect the QA signer and wait for the current transaction.');
-    if((signerId&&signerId!==accountId)||![vaultId,usdcId].includes(receiverId??'')||!actions.length)throw Error('QA signer refuses this transaction target.');
+    if((signerId&&signerId!==accountId)||![...VAULTS.map(v=>v.id),usdcId].includes(receiverId??'')||!actions.length)throw Error('QA signer refuses this transaction target.');
     pending=true;
     try{
       let gas=0n,deposit=0n;
