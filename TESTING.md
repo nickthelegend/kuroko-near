@@ -1,3 +1,23 @@
+# Testing — 2026-11-13 (rebuild)
+
+`pnpm test` from the repository root, after the UI rebuild: **21 executable tests, 0 failed, 0 skipped.**
+
+| Suite | Passed | What it checks |
+| --- | ---: | --- |
+| SDK (`tsx --test`) | 5 | Integer quote math, exact-output rounding, rule rejection, missing inventory |
+| Solver | 1 | Missing `PARTNER_JWT` fails loudly before any network access |
+| MCP | 1 | Missing vault account is reported, not invented |
+| Web | 7 | Receipt validation (refunded deposit, failed withdrawal receipt, pending results), duplicate indexed receipts, QA signer policy (mainnet RPC and non-testnet accounts refused; both approved FastNEAR testnet endpoints accepted; gas, deposit and cap bounds) |
+| Contract unit (`cargo test`) | 3 | Share mint at cash NAV, proportional burn, vote weight cannot be reused |
+| Sandbox: assets (`near-workspaces`, local nearcore) | 2 | Real local NEP-141 deposit, mint, withdrawal and balance reconciliation; refunds |
+| Sandbox: vault | 2 | Forged deposit, unauthorised loss report and non-shareholder withdrawal rejected; rule checks, loss pause, vote lifecycle and transfer locks |
+| **Total** | **21** | |
+
+Web TypeScript (`tsc --noEmit`) and the production Vite build pass. Live checks are in [FLOW-QA.md](FLOW-QA.md)
+(every route at 1440 and 390, 0 px overflow) and the real signed deposit/withdrawal of the film take in
+[docs/FILM.md](docs/FILM.md). No test mocks a chain: contract tests run on a local nearcore sandbox; the web reads
+live NEAR testnet.
+
 # Real browser QA signer — 2026-11-11
 
 Screenshots were captured locally during QA and are not committed.
