@@ -2,7 +2,7 @@
 import {connect,keyStores,KeyPair,transactions,providers} from 'near-api-js';
 import type {AppWallet,WalletLayer} from './wallet-layer';
 import {vaultId,usdcId,liveRecord} from './rpc';
-import {checkQaNetwork,qaReservation,QA_RPCS,QA_CAP} from './qa-signer-policy';
+import {checkQaNetwork,qaReservation,QA_RPCS,QA_READ_RPCS,QA_CAP} from './qa-signer-policy';
 import {VAULTS} from './vaults';
 
 type Input={accountId:string;secretKey:string;rpcUrl:string};
@@ -42,7 +42,9 @@ export async function setupQaSigner():Promise<WalletLayer>{
         const a=action.functionCall;gas+=BigInt(a.gas.toString());deposit+=BigInt(a.deposit.toString());
         return transactions.functionCall(a.methodName,a.args,BigInt(a.gas.toString()),BigInt(a.deposit.toString()));
       });
-      const {gas_price}=await provider.sendJsonRpc('gas_price',[null]) as {gas_price:string};
+      let gas_price='';
+      for(let i=0;i<8&&!gas_price;i++){try{gas_price=(await new providers.JsonRpcProvider({url:QA_READ_RPCS[i%QA_READ_RPCS.length]}).sendJsonRpc('gas_price',[null]) as {gas_price:string}).gas_price;}catch{await new Promise(r=>setTimeout(r,1200));}}
+      if(!gas_price)throw Error('QA signer could not read the gas price.');
       const reserved=qaReservation(gas,deposit,BigInt(gas_price));
       if(usedReservation+reserved>QA_CAP)throw Error('QA signer reached the 0.3 NEAR session cap.');
       const ticket=await window.__KUROKO_QA_RESERVE!({receiverId:receiverId!,methods:calls.map(a=>a.functionCall!.methodName),reservedYocto:reserved.toString()});
@@ -55,11 +57,12 @@ export async function setupQaSigner():Promise<WalletLayer>{
       // near-api-js 5 submits optimistically. Do not let the app confirm until finality.
       // Public testnet RPCs rate-limit per IP; poll the approved endpoints in turn until the transaction is final.
       let final;
-      for(let i=0;i<8&&!final;i++){try{final=await new providers.JsonRpcProvider({url:QA_RPCS[(QA_RPCS.indexOf(QA_RPC)+i)%QA_RPCS.length]}).txStatus(hash,accountId,'FINAL');}catch{await new Promise(r=>setTimeout(r,1500));}}
+      for(let i=0;i<8&&!final;i++){try{final=await new providers.JsonRpcProvider({url:QA_READ_RPCS[(QA_READ_RPCS.indexOf(QA_RPC)+i)%QA_READ_RPCS.length]}).txStatus(hash,accountId,'FINAL');}catch{await new Promise(r=>setTimeout(r,1500));}}
       if(!final)throw Error('QA signer could not read the final receipt.');
       return final as Awaited<ReturnType<AppWallet['signAndSendTransaction']>>;
     }catch(e){
       if(e instanceof Error&&e.message.startsWith('QA signer'))throw e;
+      console.warn('QA signer step failed:',(e as Error)?.message?.slice(0,160));
       throw Error('QA signer could not complete this testnet transaction. Check the recorded receipt.');
     }finally{pending=false;}
   };

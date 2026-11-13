@@ -1,6 +1,8 @@
 export const QA_RPC='https://test.rpc.fastnear.com';
 /** FastNEAR's archival testnet node serves the same chain; it is approved so a per-IP rate limit on one does not strand a signed run. */
 export const QA_RPCS=[QA_RPC,'https://archival-rpc.testnet.fastnear.com'];
+/** Read-only lookups (gas price, final receipt) may also use dRPC's public testnet endpoint; signing never does. */
+export const QA_READ_RPCS=[...QA_RPCS,'https://near-testnet.drpc.org'];
 export const QA_CAP=300000000000000000000000n;
 export const QA_GAS=100000000000000n;
 export function checkQaNetwork(accountId:string,rpcUrl:string,vault:string){
