@@ -53,6 +53,8 @@ export async function setupQaSigner():Promise<WalletLayer>{
       // signed transaction cannot execute twice (same hash, same nonce), so a rate-limited broadcast is safe to retry.
       let signed;
       for(let i=0;i<5&&!signed;i++){
+        // near-api-js caches the access key and signs with cached nonce + 1; read it fresh so each transaction gets a new nonce.
+        (account as unknown as {accessKeyByPublicKeyCache:Record<string,unknown>}).accessKeyByPublicKeyCache={};
         try{signed=await (account as unknown as {signTransaction:(r:string,a:typeof calls)=>Promise<[Uint8Array,Parameters<providers.JsonRpcProvider['sendTransactionAsync']>[0]]>}).signTransaction(receiverId!,calls);}
         catch{await new Promise(r=>setTimeout(r,1500+700*i));}
       }
