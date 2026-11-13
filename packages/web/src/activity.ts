@@ -13,13 +13,19 @@ export type VaultEvent={hash:string;at:number;kind:'deposit'|'withdrawal'|'out';
 export type Point={at:number;cash:bigint;shares:bigint;price:bigint};
 export type History={events:VaultEvent[];points:Point[];cash:bigint;shares:bigint;depositors:Set<string>;txCount:number};
 
+/** One request at a time to the public index, spaced out, with a shared pause after a rate limit. */
+let gate:Promise<unknown>=Promise.resolve();let pausedUntil=0;
+function queued<T>(fn:()=>Promise<T>):Promise<T>{
+  const run=gate.then(async()=>{const wait=Math.max(0,pausedUntil-Date.now());if(wait)await new Promise(r=>setTimeout(r,wait));try{return await fn();}finally{await new Promise(r=>setTimeout(r,350));}});
+  gate=run.catch(()=>undefined);return run;
+}
 async function post<T>(path:string,body:object):Promise<T>{
-  // The public index rate-limits per IP; a limited reply carries no CORS header, so it surfaces as a network error.
+  // The index rate-limits per IP; a limited reply carries no CORS header, so it surfaces as a network error.
   let r:Response|undefined;
   for(let attempt=0;attempt<4;attempt++){
-    try{r=await fetch(`${INDEX}/${path}`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)});if(r.status!==429&&r.status<500)break;}
-    catch{r=undefined;}
-    await new Promise(res=>setTimeout(res,700*(attempt+1)+Math.random()*400));
+    r=await queued(async()=>{try{return await fetch(`${INDEX}/${path}`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)});}catch{return undefined;}});
+    if(r&&r.status!==429&&r.status<500)break;
+    pausedUntil=Date.now()+2500*(attempt+1);
   }
   if(!r)throw new Error('Testnet transaction history is unreachable. It will retry automatically.');
   if(!r.ok)throw new Error(`Testnet transaction history is unavailable (HTTP ${r.status}). It will retry automatically.`);

@@ -49,7 +49,7 @@ export function StoreProvider({children}:{children:ReactNode}){
     return all.sort((a,b)=>b.at-a.at);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },vaults.map(v=>v.history));
-  const feedReady=vaults.every(v=>'value' in v.history&&v.history.value);
+  const feedReady=vaults.every(v=>('value' in v.history&&!!v.history.value)||v.history.state==='error')&&vaults.some(v=>'value' in v.history&&!!v.history.value);
   const feedError=vaults.map(v=>v.history.state==='error'?v.history.message:'').find(Boolean);
   const totals=useMemo(()=>{
     let cash=0n;const people=new Set<string>();let txs=0;let ready=true;

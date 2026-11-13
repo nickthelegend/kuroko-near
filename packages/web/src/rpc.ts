@@ -21,17 +21,22 @@ export type SolverState={mode:'listen';startedAt:string;requestsSeen:number;woul
  */
 const RPCS=[...new Set([rpcUrl,'https://test.rpc.fastnear.com','https://archival-rpc.testnet.fastnear.com','https://near-testnet.drpc.org'])];
 let rr=0;
+/** An endpoint that rate-limits or fails is skipped for a while, so a busy provider costs one failed request, not one per poll. */
+const coolUntil=new Map<string,number>();
 export async function rpcPost<T>(body:object):Promise<T>{
   let last='';
-  for(let i=0;i<RPCS.length*2;i++){
-    const url=RPCS[(rr+i)%RPCS.length];
+  const order=[...RPCS.slice(rr),...RPCS.slice(0,rr)];
+  const ready=order.filter(u=>(coolUntil.get(u)??0)<Date.now());
+  const tries=[...(ready.length?ready:order),...order];
+  for(let i=0;i<tries.length;i++){
+    const url=tries[i];
     try{
       const r=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(12000)});
-      if(r.status===429||r.status>=500){last=`HTTP ${r.status}`;continue;}
+      if(r.status===429||r.status>=500){last=`HTTP ${r.status}`;coolUntil.set(url,Date.now()+30000);continue;}
       if(!r.ok)throw new Error(`NEAR testnet RPC HTTP ${r.status}`);
-      rr=(rr+1)%RPCS.length;
+      rr=(RPCS.indexOf(url)+1)%RPCS.length;
       return await r.json() as T;
-    }catch(e){last=(e as Error).message;if(i>=RPCS.length)await new Promise(r=>setTimeout(r,400));}
+    }catch(e){last=(e as Error).message;coolUntil.set(url,Date.now()+30000);if(i>=RPCS.length)await new Promise(r=>setTimeout(r,500));}
   }
   throw new Error(`NEAR testnet RPC is unreachable (${last||'no answer'}). Retrying on the next refresh.`);
 }
