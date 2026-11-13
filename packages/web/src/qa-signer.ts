@@ -2,7 +2,7 @@
 import {connect,keyStores,KeyPair,transactions,providers,utils} from 'near-api-js';
 import type {AppWallet,WalletLayer} from './wallet-layer';
 import {vaultId,usdcId,liveRecord} from './rpc';
-import {checkQaNetwork,qaReservation,QA_RPCS,QA_READ_RPCS,QA_CAP} from './qa-signer-policy';
+import {checkQaNetwork,qaReservation,QA_RPCS,QA_READ_RPCS,QA_SEND_RPCS,QA_CAP} from './qa-signer-policy';
 import {VAULTS} from './vaults';
 
 type Input={accountId:string;secretKey:string;rpcUrl:string};
@@ -60,7 +60,7 @@ export async function setupQaSigner():Promise<WalletLayer>{
       const hash=utils.serialize.base_encode(signed[0]);
       let accepted=false;
       for(let i=0;i<10&&!accepted;i++){
-        try{await new providers.JsonRpcProvider({url:QA_RPCS[i%QA_RPCS.length]}).sendTransactionAsync(signed[1]);accepted=true;}
+        try{await new providers.JsonRpcProvider({url:QA_SEND_RPCS[i%QA_SEND_RPCS.length]}).sendTransactionAsync(signed[1]);accepted=true;}
         catch{await new Promise(r=>setTimeout(r,1500+500*i));}
       }
       if(!accepted)throw Error('QA signer submission did not return a receipt. The budget remains reserved; do not retry blindly.');
