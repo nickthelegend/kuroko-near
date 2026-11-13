@@ -53,7 +53,10 @@ export async function setupQaSigner():Promise<WalletLayer>{
       const hash=sent.transaction.hash;
       await window.__KUROKO_QA_RECEIPT!(ticket,hash);
       // near-api-js 5 submits optimistically. Do not let the app confirm until finality.
-      const final=await provider.txStatus(hash,accountId,'FINAL');
+      // Public testnet RPCs rate-limit per IP; poll the approved endpoints in turn until the transaction is final.
+      let final;
+      for(let i=0;i<8&&!final;i++){try{final=await new providers.JsonRpcProvider({url:QA_RPCS[(QA_RPCS.indexOf(QA_RPC)+i)%QA_RPCS.length]}).txStatus(hash,accountId,'FINAL');}catch{await new Promise(r=>setTimeout(r,1500));}}
+      if(!final)throw Error('QA signer could not read the final receipt.');
       return final as Awaited<ReturnType<AppWallet['signAndSendTransaction']>>;
     }catch(e){
       if(e instanceof Error&&e.message.startsWith('QA signer'))throw e;
