@@ -118,6 +118,52 @@
       "at": "2026-11-13T15:19:48.516Z",
       "vault": "kuroko-wide-fbdc8316.testnet",
       "amount": "150000"
+    },
+    {
+      "label": "lp2: deposit 100000 raw USDC into stable",
+      "hash": "D36aTHN2yj5w1zzgWG7LR9HrP9JyeVNwoALUfZh5SZRj",
+      "explorer": "https://testnet.nearblocks.io/txns/D36aTHN2yj5w1zzgWG7LR9HrP9JyeVNwoALUfZh5SZRj",
+      "vault": "kuroko-stable-72e3ee65.testnet",
+      "amount": "100000",
+      "note": "Sent through near-testnet.drpc.org, which answered HTTP 500 to the client although the transaction executed; recovered from FastNEAR's account index (block 277529484). The script's retry then deposited the 80000 below."
+    },
+    {
+      "label": "lp2: deposit 80000 raw USDC into stable",
+      "hash": "Hv5AD9Rqb3z24BLz5C3ZSZrMdjtujqiQzi63DqGaG32S",
+      "explorer": "https://testnet.nearblocks.io/txns/Hv5AD9Rqb3z24BLz5C3ZSZrMdjtujqiQzi63DqGaG32S",
+      "at": "2026-11-13T15:40:42.353Z",
+      "vault": "kuroko-stable-72e3ee65.testnet",
+      "amount": "80000"
+    },
+    {
+      "label": "lp3: propose stable rules",
+      "hash": "HgccnkSivxM6QLCm79xJ5ZBTYUSu9GuHCsQApye4xx9y",
+      "explorer": "https://testnet.nearblocks.io/txns/HgccnkSivxM6QLCm79xJ5ZBTYUSu9GuHCsQApye4xx9y",
+      "at": "2026-11-13T15:40:46.338Z",
+      "constitution": {
+        "allowed_pairs": [
+          "nep141:3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af/nep141:usdt.fakes.testnet",
+          "nep141:3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af/nep141:usdc.fakes.testnet"
+        ],
+        "max_inventory_usdc": "3000000",
+        "min_spread_bps": 8,
+        "daily_loss_limit_usdc": "50000"
+      },
+      "proposalId": 0
+    },
+    {
+      "label": "lp3: vote yes",
+      "hash": "FJgfsvKxD13vjoJ6uWT6QY8R3haVrY8WuZi87TUC3Hyp",
+      "explorer": "https://testnet.nearblocks.io/txns/FJgfsvKxD13vjoJ6uWT6QY8R3haVrY8WuZi87TUC3Hyp",
+      "at": "2026-11-13T15:40:50.009Z",
+      "proposalId": 0
+    },
+    {
+      "label": "lp2: vote no",
+      "hash": "9eWRBA841u5WGXWh3cuevkMe5S8F6JFJbeGGGCLDYhyS",
+      "explorer": "https://testnet.nearblocks.io/txns/9eWRBA841u5WGXWh3cuevkMe5S8F6JFJbeGGGCLDYhyS",
+      "at": "2026-11-13T15:40:53.663Z",
+      "proposalId": 0
     }
   ],
   "observedAt": "2026-11-13T15:19:48.516Z",
