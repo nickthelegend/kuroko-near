@@ -33,7 +33,10 @@ function usePoll<T>(load:()=>Promise<T>,every:number,kick:number):[Live<T>,numbe
 
 function useVaultLive(meta:VaultMeta,kick:number):VaultLive{
   const [state,changedAt]=usePoll(()=>view<VaultState>(meta.id,'state'),5000,kick);
-  const [history]=usePoll(()=>loadHistory(meta.id),30000,kick+changedAt);
+  // The index lags the chain by a few blocks, so a state change triggers a second history read shortly after.
+  const [late,setLate]=useState(0);
+  useEffect(()=>{if(!changedAt)return;const t=setTimeout(()=>setLate(Date.now()),9000);return()=>clearTimeout(t);},[changedAt]);
+  const [history]=usePoll(()=>loadHistory(meta.id),30000,kick+changedAt+late);
   const [proposals]=usePoll(()=>view<Proposal[]>(meta.id,'proposals'),20000,kick+changedAt);
   return {meta,state,history,proposals,changedAt};
 }

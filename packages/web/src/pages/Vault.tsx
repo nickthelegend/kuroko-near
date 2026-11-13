@@ -48,7 +48,7 @@ function VaultBody({v}:{v:VaultLive}){
     <div className="vault-grid">
       <div className="vault-main">
         <section className="kpis" aria-label="Vault numbers">
-          <div className="kpi kpi-lead"><span className="label">Total deposits</span>{s?<Num value={usd(s.usdc_balance)} dp={2} unit="USDC" className="kpi-num"/>:<Skel h={40} w={160}/>}<span className="kpi-sub">{last?<>Last change {agoShort(last.at,now)}</>:'…'}</span></div>
+          <div className="kpi kpi-lead"><span className="label">Total deposits</span>{s?<Num value={usd(s.usdc_balance)} dp={2} unit="USDC" className="kpi-num"/>:<Skel h={40} w={160}/>}<span className="kpi-sub">{last?<>Last change {agoShort(Math.max(last.at,v.changedAt||0),now)}</>:'…'}</span></div>
           <div className="kpi"><span className="label">Share price, USDC</span>{s?<Num value={priceNum(s)} dp={6} strong={2} className="kpi-num"/>:<Skel h={40} w={160}/>}<span className="kpi-sub">Moves only with earned spread</span></div>
           <div className="kpi"><span className="label">APY</span><span className="kpi-num apy-none">—</span><span className="kpi-sub">No fills yet</span></div>
           <div className="kpi"><span className="label">Your position</span>{!w.account?<><span className="kpi-num num-empty">—</span><button type="button" className="kpi-sub linkish" onClick={()=>void w.connect()} disabled={!w.ready}>Connect wallet</button></>:myValue==null?<Skel h={40} w={110}/>:<><Num value={myValue} dp={2} unit="USDC" className="kpi-num"/><span className="kpi-sub">{decimal(myShares!,6,4)} shares</span></>}</div>

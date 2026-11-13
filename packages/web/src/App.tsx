@@ -2,7 +2,7 @@ import {createContext,useCallback,useContext,useEffect,useState,type ReactNode} 
 import {actionCreators} from '@near-wallet-selector/core';
 import {setupWalletLayer,type WalletLayer} from './wallet-layer';
 import {confirmedHash} from './transactions';
-import {navigate,short} from './rpc';
+import {acctName,navigate} from './rpc';
 import {StoreProvider,useStore,val} from './store';
 import {VAULTS} from './vaults';
 import {Icon,Mark,Pulse,useNow} from './ui';
@@ -107,7 +107,7 @@ export function Heartbeat(){
 export function WalletButton({dark=false}:{dark?:boolean}){
   const w=useWallet();
   return w.account
-    ?<button className={`btn btn-sm ${dark?'btn-ghost-dark':'btn-line'} acct`} onClick={()=>void w.disconnect()} title="Disconnect wallet"><span className="acct-dot"/><span className="mono">{short(w.account,10,6)}</span></button>
+    ?<button className={`btn btn-sm ${dark?'btn-ghost-dark':'btn-line'} acct`} onClick={()=>void w.disconnect()} title="Disconnect wallet"><span className="acct-dot"/><span className="mono">{acctName(w.account)}</span></button>
     :<button className="btn btn-sm btn-ink" onClick={()=>void w.connect()} disabled={!w.ready}><Icon name="wallet" size={15}/><span>Connect<span className="hide-sm"> wallet</span></span></button>;
 }
 
