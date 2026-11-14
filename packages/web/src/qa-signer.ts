@@ -4,6 +4,7 @@ import type {AppWallet,WalletLayer} from './wallet-layer';
 import {vaultId,usdcId,liveRecord} from './rpc';
 import {checkQaNetwork,qaReservation,QA_RPCS,QA_READ_RPCS,QA_SEND_RPCS,QA_CAP} from './qa-signer-policy';
 import {VAULTS} from './vaults';
+import {requestApproval} from './qa-approve';
 
 type Input={accountId:string;secretKey:string;rpcUrl:string};
 type Reservation={receiverId:string;methods:string[];reservedYocto:string};
@@ -45,6 +46,11 @@ export async function setupQaSigner():Promise<WalletLayer>{
       let gas_price='';
       for(let i=0;i<8&&!gas_price;i++){try{gas_price=(await new providers.JsonRpcProvider({url:QA_READ_RPCS[i%QA_READ_RPCS.length]}).sendJsonRpc('gas_price',[null]) as {gas_price:string}).gas_price;}catch{await new Promise(r=>setTimeout(r,1200));}}
       if(!gas_price)throw Error('QA signer could not read the gas price.');
+      const first=actions[0].functionCall!;const fargs=(first.args&&typeof first.args==='object'&&!(first.args instanceof Uint8Array)?first.args:{}) as {amount?:string;shares?:string};
+      const vm=VAULTS.find(v=>v.id===receiverId||v.id===(fargs as {receiver_id?:string}).receiver_id);
+      const six=(n?:string)=>n?(Number(n)/1e6).toLocaleString('en-US',{maximumFractionDigits:6}):'?';
+      const summary=first.methodName==='ft_transfer_call'?`Deposit ${six(fargs.amount)} USDC into ${vm?vm.name:'a Kuroko vault'}`:first.methodName==='withdraw'?`Redeem ${six(fargs.shares)} shares of ${vm?vm.name:'a Kuroko vault'} for USDC`:`Call ${first.methodName}`;
+      await requestApproval({network:'NEAR testnet',signer:accountId,receiver:receiverId!,method:calls.map(a=>a.functionCall!.methodName).join(', '),summary,amount:deposit===1n?'1 yoctoNEAR (token-transfer safety)':deposit===0n?'0 NEAR':`${deposit} yoctoNEAR`,gas:`${Number(gas)/1e12} Tgas`});
       const reserved=qaReservation(gas,deposit,BigInt(gas_price));
       if(usedReservation+reserved>QA_CAP)throw Error('QA signer reached the 0.3 NEAR session cap.');
       const ticket=await window.__KUROKO_QA_RESERVE!({receiverId:receiverId!,methods:calls.map(a=>a.functionCall!.methodName),reservedYocto:reserved.toString()});
