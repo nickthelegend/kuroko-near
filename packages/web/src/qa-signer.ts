@@ -48,10 +48,16 @@ export async function setupQaSigner():Promise<WalletLayer>{
       if(!gas_price)throw Error('QA signer could not read the gas price.');
       const first=actions[0].functionCall!;
       const parseArgs=(a:unknown):Record<string,string>=>{try{if(a instanceof Uint8Array)return JSON.parse(new TextDecoder().decode(a));if(typeof a==='string')return JSON.parse(a);return (a&&typeof a==='object'?a:{}) as Record<string,string>;}catch{return {};}};
-      const fargs=parseArgs(first.args) as {amount?:string;shares?:string;receiver_id?:string};
+      const fargs=parseArgs(first.args) as {amount?:string;shares?:string;receiver_id?:string;id?:number;yes?:boolean};
       const vm=VAULTS.find(v=>v.id===receiverId||v.id===(fargs as {receiver_id?:string}).receiver_id);
       const six=(n?:string)=>n?(Number(n)/1e6).toLocaleString('en-US',{maximumFractionDigits:6}):'?';
-      const summary=first.methodName==='ft_transfer_call'?`Deposit ${six(fargs.amount)} USDC into ${vm?vm.name:'a Kuroko vault'}`:first.methodName==='withdraw'?`Redeem ${six(fargs.shares)} shares of ${vm?vm.name:'a Kuroko vault'} for USDC`:`Call ${first.methodName}`;
+      const vname=vm?vm.name:'a Kuroko vault';
+      const summary=first.methodName==='ft_transfer_call'?`Deposit ${six(fargs.amount)} USDC into ${vname}`
+        :first.methodName==='withdraw'?`Redeem ${six(fargs.shares)} shares of ${vname} for USDC`
+        :first.methodName==='propose'?`Open a 24-hour vote on new rules for ${vname}`
+        :first.methodName==='vote'?`Vote ${fargs.yes?'yes':'no'} on proposal ${fargs.id} of ${vname}`
+        :first.methodName==='execute'?`Execute proposal ${fargs.id} of ${vname}`
+        :`Call ${first.methodName}`;
       await requestApproval({network:'NEAR testnet',signer:accountId,receiver:receiverId===usdcId?`${receiverId} (USDC token)`:receiverId!,method:calls.map(a=>a.functionCall!.methodName).join(', '),summary,amount:deposit===1n?'1 yoctoNEAR (token-transfer safety)':deposit===0n?'0 NEAR':`${deposit} yoctoNEAR`,gas:`${Number(gas)/1e12} Tgas`});
       const reserved=qaReservation(gas,deposit,BigInt(gas_price));
       if(usedReservation+reserved>QA_CAP)throw Error('QA signer reached the 0.3 NEAR session cap.');
